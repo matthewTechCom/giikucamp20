@@ -3,6 +3,7 @@ package main
 
 import (
 	"chat_upgrade/controller"
+	"chat_upgrade/db"
 	"chat_upgrade/model"
 	"chat_upgrade/repository"
 	"chat_upgrade/router"
@@ -17,10 +18,12 @@ import (
 )
 
 func main() {
+	// 環境変数の読み込み
 	if err := godotenv.Load(); err != nil {
 		log.Fatalln(err)
 	}
 
+	// AWSの設定
 	config := model.Config{
 		AWSAccessKeyID:     os.Getenv("AWS_ACCESS_KEY_ID"),
 		AWSSecretAccessKey: os.Getenv("AWS_SECRET_ACCESS_KEY"),
@@ -34,11 +37,24 @@ func main() {
 	log.Printf("AWSRegion: %s", config.AWSRegion)
 	log.Printf("S3Bucket: %s", config.S3Bucket)
 
+	// データベース接続
+	dbConnection := db.NewDB()
+	defer db.CloseDB(dbConnection)
+
+	// リポジトリとユースケースの初期化
 	hubRepository := repository.NewInMemoryHubRepo()
 	hubUsecase := usecase.NewHubUsecase(hubRepository, config)
 	hubController := controller.NewHubController(hubUsecase)
 	fileController := controller.NewFileController(hubUsecase)
-	e := router.NewRouter(hubController, fileController)
+
+	userRepository := repository.NewUserRepository(dbConnection)
+	userUsecase := usecase.NewUserUsecase(userRepository)
+	userController := controller.NewUserController(userUsecase)
+
+	// ルーターの設定
+	e := router.NewRouter(hubController, fileController, userController)
+
+	// ミドルウェアの設定
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -46,5 +62,7 @@ func main() {
 		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS},
 	}))
 	e.Use(middleware.BodyLimit("10M")) // 必要に応じてサイズを調整
+
+	// サーバーの起動
 	e.Logger.Fatal(e.Start(":8080"))
 }
