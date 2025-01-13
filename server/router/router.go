@@ -9,15 +9,14 @@ import (
 func NewRouter(hc controller.IHubController, fc controller.IFileController, uc controller.IUserController) *echo.Echo {
 	e := echo.New()
 
-	// WebSocketルーム
+	// ユーザー認証のルート
+	e.POST("/signup", uc.SignUp)
+	e.POST("/login", uc.LogIn)
+	e.GET("/me", uc.Me)
+
+	// 必要なら WebSocket ルートも追加
 	e.GET("/rooms/:id/ws", hc.ServerWs)
-
-	// ファイルアップロード
 	e.POST("/upload", fc.UploadFile)
-
-	// ユーザー認証
-	e.POST("/signup", uc.SignUp)   // ユーザー登録
-	e.POST("/login", uc.LogIn)     // ログイン
 
 	return e
 }
