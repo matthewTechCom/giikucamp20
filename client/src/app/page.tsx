@@ -1,51 +1,66 @@
-import React, { useContext, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { UserContext } from '../context/UserContext'
+"use client";
+import { useRouter } from "next/router"; // Next.js の useRouter フックをインポート
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { UserContext } from "../context/UserContext";
 
 const AccountCreation: React.FC = () => {
-  const navigate = useNavigate()
-  const { setUser } = useContext(UserContext)
+  const [isClient, setIsClient] = useState(false); // クライアントサイドであるかを追跡
+  const { setUser } = useContext(UserContext);
 
-  const [username, setUsername] = useState('')
-  const [previewIcon, setPreviewIcon] = useState<string>('') // プレビュー用
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [username, setUsername] = useState("");
+  const [previewIcon, setPreviewIcon] = useState<string>(""); // プレビュー用
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setIsClient(true); // クライアントサイドで実行
+  }, []);
 
   const handleIconChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = (ev) => {
-      if (typeof ev.target?.result === 'string') {
-        setPreviewIcon(ev.target.result) // Base64のDataURL
+      if (typeof ev.target?.result === "string") {
+        setPreviewIcon(ev.target.result); // Base64 の DataURL
       }
-    }
-    reader.readAsDataURL(file)
-  }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!username.trim()) {
-      alert('ユーザー名を入力してください')
-      return
+      alert("ユーザー名を入力してください");
+      return;
     }
     if (!previewIcon) {
-      alert('アイコン画像を選択してください')
-      return
+      alert("アイコン画像を選択してください");
+      return;
     }
 
     // Context にユーザー情報を保存
     setUser({
       username: username.trim(),
       userIcon: previewIcon, // DataURL
-    })
+    });
 
-    navigate('/rooms')
+    if (isClient) {
+      const router = useRouter(); // クライアントサイドでのみ useRouter を呼び出す
+      router.push("/rooms");
+    }
+  };
+
+  if (!isClient) {
+    return null; // サーバーサイドでは何もレンダリングしない
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-full max-w-md">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded shadow w-full max-w-md"
+      >
         <h1 className="text-2xl font-bold mb-4">アカウント作成</h1>
         <div className="mb-4">
           <label className="block font-semibold mb-1">ユーザー名</label>
@@ -68,7 +83,11 @@ const AccountCreation: React.FC = () => {
           />
           {previewIcon && (
             <div className="mt-2">
-              <img src={previewIcon} alt="preview" className="w-16 h-16 object-cover rounded-full" />
+              <img
+                src={previewIcon}
+                alt="preview"
+                className="w-16 h-16 object-cover rounded-full"
+              />
             </div>
           )}
         </div>
@@ -80,7 +99,7 @@ const AccountCreation: React.FC = () => {
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default AccountCreation
+export default AccountCreation;
