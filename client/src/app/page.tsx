@@ -16,7 +16,7 @@ const HomePage = () => {
 
       {/* 説明テキスト */}
       <p className="text-xl text-white mb-6 animate__animated animate__fadeIn animate__delay-2s">
-        世界中の人々と簡単にマップを共有しながら、チャットを楽しめます。
+        ここの見出しの文章を考えてほしい！
       </p>
 
       {/* ボタン */}
