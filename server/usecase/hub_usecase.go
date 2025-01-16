@@ -30,6 +30,7 @@ type IHubUsecase interface {
 	JoinRoom(roomName string, password string) (*model.Hub, error)
 	GetHub(roomName string) (*model.Hub, bool)
 	UploadToS3(fileHeader *multipart.FileHeader, src multipart.File) (string, error)
+	CloseHub(hub *model.Hub)
 }
 
 type hubUsecase struct {
@@ -89,6 +90,15 @@ func (hu *hubUsecase) UploadToS3(fileHeader *multipart.FileHeader, src multipart
 	return result.Location, nil
 }
 
+func (hu *hubUsecase) CloseHub(hub *model.Hub) {
+	if err := hu.hr.DeleteHub(hub.RoomName); err != nil {
+		log.Printf("Failed to delete hub: %v", err)
+	}
+
+	close(hub.Close)
+	log.Printf("Hub closed: %s", hub.RoomName)
+}
+
 func (hu *hubUsecase) RunHub(hub *model.Hub) {
 	for {
 		select {
@@ -116,12 +126,26 @@ func (hu *hubUsecase) RunHub(hub *model.Hub) {
 			hu.BroadcastMessage(hub, leaveMsg)
 		case msg := <-hub.Broadcast:
 			hu.BroadcastMessage(hub, msg)
+
+		case <-hub.Close:
+			log.Printf("RunHub loop stopped for room: %s", hub.RoomName)
+			return
 		}
 	}
 }
 
 func (hu *hubUsecase) RegisterClient(hub *model.Hub, client *model.Client) {
 	hub.Clients[client] = true
+
+	for _, oldMsg := range hub.PastMessages {
+		select {
+		case client.Send <- oldMsg:
+		default:
+			close(client.Send)
+			delete(hub.Clients, client)
+			return
+		}
+	}
 }
 
 func (hu *hubUsecase) UnregisterClient(hub *model.Hub, client *model.Client) {
@@ -129,9 +153,14 @@ func (hu *hubUsecase) UnregisterClient(hub *model.Hub, client *model.Client) {
 		delete(hub.Clients, client)
 		close(client.Send)
 	}
+	if len(hub.Clients) == 0 {
+		hu.CloseHub(hub)
+	}
 }
 
 func (hu *hubUsecase) BroadcastMessage(hub *model.Hub, msg *model.Message) {
+	hub.PastMessages = append(hub.PastMessages, msg)
+
 	for client := range hub.Clients {
 		select {
 		case client.Send <- msg:
