@@ -8,40 +8,48 @@ import (
 
 // インターフェース定義
 type IUserRepository interface {
-	SaveUser(user model.User) error              // ユーザーを保存
-	FindByUsername(username string) (*model.User, error) // ユーザー名で検索
-	GetUserByID(userID uint) (*model.User, error) // ユーザーIDで検索 (追加)
+	GetUserByUsername(user *model.User, username string) error
+	CreateUser(user *model.User) error
+	UpdateUserIcon(userID uint, userIcon string) error
+	GetUserByID(user *model.User, userID uint) error
 }
 
+// リポジトリ構造体
 type userRepository struct {
 	db *gorm.DB
 }
 
-// コンストラクタ関数
+// ファクトリ関数
 func NewUserRepository(db *gorm.DB) IUserRepository {
-	return &userRepository{db: db}
+	return &userRepository{db}
 }
 
-// ✅ ユーザーを保存
-func (r *userRepository) SaveUser(user model.User) error {
-	return r.db.Create(&user).Error
-}
-
-// ✅ ユーザー名で検索
-func (r *userRepository) FindByUsername(username string) (*model.User, error) {
-	var user model.User
-	// 必要なカラムのみを選択
-	if err := r.db.Select("id", "username", "password", "user_icon").Where("username = ?", username).First(&user).Error; err != nil {
-		return nil, err
+// メールアドレスでユーザーを取得するメソッド
+func (ur *userRepository) GetUserByUsername(user *model.User, username string) error {
+	if err := ur.db.Where("username = ?", username).First(user).Error; err != nil {
+		return err
 	}
-	return &user, nil
+	return nil
 }
 
-// ✅ ユーザーIDで検索 (追加)
-func (r *userRepository) GetUserByID(userID uint) (*model.User, error) {
-	var user model.User
-	if err := r.db.Select("id", "username", "user_icon").Where("id = ?", userID).First(&user).Error; err != nil {
-		return nil, err
+// 新規ユーザーを作成するメソッド
+func (ur *userRepository) CreateUser(user *model.User) error {
+	if err := ur.db.Create(user).Error; err != nil {
+		return err
 	}
-	return &user, nil
+	return nil
 }
+
+// ユーザーのアイコンを更新するメソッド
+func (ur *userRepository) UpdateUserIcon(userID uint, userIcon string) error {
+	if err := ur.db.Model(&model.User{}).Where("id = ?", userID).Update("user_icon", userIcon).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// ユーザーIDでユーザー情報を取得するメソッド
+func (ur *userRepository) GetUserByID(user *model.User, userID uint) error {
+    return ur.db.First(user, userID).Error
+}
+

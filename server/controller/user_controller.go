@@ -1,62 +1,165 @@
-// controller.go
 package controller
 
 import (
 	"chat_upgrade/model"
 	"chat_upgrade/usecase"
-	"log"
+	"fmt"
 	"net/http"
+	"os"
+	"strings"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
 type IUserController interface {
 	SignUp(c echo.Context) error
 	LogIn(c echo.Context) error
+	LogOut(c echo.Context) error
 	Me(c echo.Context) error
+	CsrfToken(c echo.Context) error
 }
 
 type userController struct {
-	uc usecase.IUserUsecase
+	uu usecase.IUserUsecase
 }
 
-func NewUserController(uc usecase.IUserUsecase) IUserController {
-	return &userController{uc: uc}
+func NewUserController(uu usecase.IUserUsecase) IUserController {
+	return &userController{uu}
 }
 
-// サインアップ処理
 func (uc *userController) SignUp(c echo.Context) error {
-	var user model.User
-	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	if username == "" || password == "" {
+		return c.JSON(http.StatusBadRequest, "username と password は必須です")
 	}
 
-	if err := uc.uc.RegisterUser(user); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to register user"})
+	user := model.User{
+		Username: username,
+		Password: password,
 	}
 
-	return c.JSON(http.StatusCreated, map[string]string{"message": "User registered successfully"})
+	userRes, err := uc.uu.SignUp(user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusCreated, userRes)
 }
 
-// ログイン処理
 func (uc *userController) LogIn(c echo.Context) error {
-	var loginRequest model.User
-	if err := c.Bind(&loginRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
+    user := model.User{}
+    if err := c.Bind(&user); err != nil {
+        return c.JSON(http.StatusBadRequest, echo.Map{
+            "error": "リクエストデータの形式が正しくありません",
+        })
+    }
 
-	log.Println("ログイン処理が呼び出されました")
+    if user.Username == "" || user.Password == "" {
+        return c.JSON(http.StatusBadRequest, echo.Map{
+            "error": "username と password は必須です",
+        })
+    }
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "Login successful"})
+    // ユーザー認証とトークン生成
+    tokenString, err := uc.uu.Login(user)
+    if err != nil {
+        return c.JSON(http.StatusUnauthorized, echo.Map{
+            "error": "認証に失敗しました",
+        })
+    }
+
+    // トークンをCookieに設定
+    cookie := new(http.Cookie)
+    cookie.Name = "token"
+    cookie.Value = tokenString
+    cookie.Expires = time.Now().Add(24 * time.Hour)
+    cookie.Path = "/"
+    cookie.Domain = os.Getenv("API_DOMAIN")
+    cookie.Secure = true
+    cookie.HttpOnly = true
+    cookie.SameSite = http.SameSiteNoneMode
+    c.SetCookie(cookie)
+
+    // トークンをJSONレスポンスとして返す
+    return c.JSON(http.StatusOK, echo.Map{
+        "token": tokenString,
+    })
 }
 
-// ユーザー情報取得処理（ダミーデータ）
+func (uc *userController) LogOut(c echo.Context) error {
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = ""
+	cookie.Expires = time.Now()
+	cookie.Path = "/"
+	cookie.Domain = os.Getenv("API_DOMAIN")
+	cookie.Secure = true
+	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteDefaultMode   //http.SameSiteNoneMode
+    //http.SameSiteDefaultMode
+	c.SetCookie(cookie)
+	return c.NoContent(http.StatusOK)
+}
+// コントローラでの修正例（Me エンドポイント）
+// ヘッダーからトークンを取得
 func (uc *userController) Me(c echo.Context) error {
-	log.Println("ユーザー情報を取得します")
+    tokenStr := c.Request().Header.Get("Authorization")
+    if tokenStr == "" {
+        return c.JSON(http.StatusUnauthorized, echo.Map{
+            "error": "トークンが提供されていません",
+        })
+    }
+    tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 
-	// ダミーデータを返却
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"username": "testuser",
-		"userIcon": "https://example.com/icon.png",
+    token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+            return nil, fmt.Errorf("無効な署名方法")
+        }
+        return []byte(os.Getenv("SECRET")), nil
+    })
+
+    if err != nil || !token.Valid {
+        return c.JSON(http.StatusUnauthorized, echo.Map{
+            "error": "トークンが無効です",
+        })
+    }
+
+    claims, ok := token.Claims.(jwt.MapClaims)
+    if !ok {
+        return c.JSON(http.StatusUnauthorized, echo.Map{
+            "error": "トークンからユーザー情報を取得できません",
+        })
+    }
+
+    userID, ok := claims["user_id"].(float64)
+    if !ok {
+        return c.JSON(http.StatusUnauthorized, echo.Map{
+            "error": "ユーザーIDがトークンに含まれていません",
+        })
+    }
+
+    user, err := uc.uu.GetUserByID(uint(userID))
+    if err != nil {
+        return c.JSON(http.StatusNotFound, echo.Map{
+            "error": "ユーザーが見つかりません",
+        })
+    }
+
+    return c.JSON(http.StatusOK, model.UserResponse{
+        ID:       user.ID,
+        Username: user.Username,
+        UserIcon: user.UserIcon,
+    })
+}
+
+
+func (uc *userController) CsrfToken(c echo.Context) error {
+	token := c.Get("csrf").(string)
+	return c.JSON(http.StatusOK, echo.Map{
+		"csrf_token": token,
 	})
 }

@@ -1,48 +1,119 @@
-// サインアップリクエスト
-export const signupUser = async (data: {
-  username: string;
-  password: string;
-  usericon?: string;
-}) => {
-  const response = await fetch("http://localhost:8080/signup", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-    credentials: "include",
-  });
+const API_URL = process.env.API_URL || "http://localhost:8080";
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "サインアップに失敗しました");
+// ✅ CSRFトークンの取得
+export const getCsrfToken = async (): Promise<string> => {
+  try {
+    const response = await fetch(`${API_URL}/csrf`, {
+      credentials: "include", // Cookieを送信
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `CSRFトークンの取得に失敗しました: ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    return data.csrf_token;
+  } catch (error) {
+    console.error("CSRFトークン取得エラー:", error);
+    throw error;
   }
-
-  return await response.json(); // サインアップ成功時のレスポンスを返却
 };
 
-// ログインリクエスト
-export const loginUser = async (data: {
-  username: string;
-  password: string;
-}) => {
-  const response = await fetch("http://localhost:8080/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-    credentials: "include", // ✅ クッキーを送信する
-  });
+// ✅ サインアップ処理
+export const signUp = async (
+  username: string,
+  password: string,
+  userIcon: File | null
+): Promise<void> => {
+  try {
+    const csrfToken = await getCsrfToken();
 
-  if (!response.ok) {
-    throw new Error("ログインに失敗しました");
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+
+    if (userIcon) {
+      formData.append("usericon", userIcon);
+    }
+
+    const response = await fetch(`${API_URL}/signup`, {
+      method: "POST",
+      headers: {
+        "X-CSRF-Token": csrfToken,
+      },
+      body: formData,
+      credentials: "include", // Cookieを送信
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `サインアップエラー: ${errorData.message || response.statusText}`
+      );
+    }
+
+    console.log("サインアップ成功");
+  } catch (error) {
+    console.error("サインアップエラー:", error);
+    throw error;
   }
+};
 
-  const result = await response.json();
-  return {
-    token: result.token,
-    username: result.username,
-    userIcon: result.userIcon,
-  };
+// ユーザー情報の型定義
+export interface UserResponse {
+  id: number;
+  username: string;
+  userIcon?: string; // ユーザーアイコンが必須でない場合
+}
+
+export const logIn = async (
+  username: string,
+  password: string
+): Promise<UserResponse> => {
+  try {
+    const csrfToken = await getCsrfToken();
+
+    // ログインリクエスト
+    const loginResponse = await fetch(`${API_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+      },
+      body: JSON.stringify({ username, password }),
+      credentials: "include", // Cookieを送信
+    });
+
+    if (!loginResponse.ok) {
+      const errorData = await loginResponse.json();
+      throw new Error(
+        `ログインエラー: ${errorData.message || loginResponse.statusText}`
+      );
+    }
+
+    const data = await loginResponse.json();
+    localStorage.setItem("token", data.token);
+
+    // ユーザー情報取得リクエスト
+    const userResponse = await fetch(`${API_URL}/me`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${data.token}`, // Authorizationヘッダーにトークンを設定
+      },
+      credentials: "include", // Cookieも送信
+    });
+
+    if (!userResponse.ok) {
+      throw new Error(`ユーザー情報取得エラー: ${userResponse.statusText}`);
+    }
+
+    const userData: UserResponse = await userResponse.json();
+    console.log("ログイン成功:", userData);
+    return userData;
+  } catch (error) {
+    console.error("ログインエラー:", error);
+    throw error;
+  }
 };

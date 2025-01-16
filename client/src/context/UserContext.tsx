@@ -1,47 +1,24 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+"use client";
 
-export type UserInfo = {
+import { createContext, ReactNode, useState } from "react";
+
+export interface User {
+  id: number;
   username: string;
   userIcon?: string;
-  token: string;
+}
+type UserContextType = {
+  user: User | null;
+  setUser: (user: User) => void;
 };
 
-export const UserContext = createContext<{
-  user: UserInfo | null;
-  setUser: (user: UserInfo | null) => void;
-}>({
+export const UserContext = createContext<UserContextType>({
   user: null,
   setUser: () => {},
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUserState] = useState<UserInfo | null>(null);
-
-  // クッキーからユーザー情報を取得する関数
-  useEffect(() => {
-    const fetchUser = async () => {
-      const response = await fetch("http://localhost:8080/me", {
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUserState(userData);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const setUser = (user: UserInfo | null) => {
-    setUserState(user);
-  };
+  const [user, setUser] = useState<User | null>(null);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -49,5 +26,3 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     </UserContext.Provider>
   );
 };
-
-export const useUser = () => useContext(UserContext);

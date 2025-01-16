@@ -1,9 +1,26 @@
-// ユーザー情報の型定義
-export type UserInfo = {
+// サインアップ/ログインのレスポンス型
+export interface AuthResponse {
+  id: number;
   username: string;
-  token: string;
-  userIcon: string;
-};
+  userIcon?: string; // サーバーが返すフィールド名に合わせる
+}
+
+// ✅ ユーザー情報のレスポンス型を修正
+export interface UserResponse {
+  id: number;
+  username: string;
+  userIcon?: string; // フィールド名を統一
+}
+
+// CSRFトークンのレスポンス型
+export interface CsrfResponse {
+  csrf_token: string;
+}
+
+// サインアップ/ログインのレスポンス型（必要に応じて変更）
+export interface AuthResponse {
+  message: string;
+}
 
 // チャットメッセージの型定義
 export type ChatMessage =

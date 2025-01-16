@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -8,22 +7,21 @@ import (
 	"chat_upgrade/repository"
 	"chat_upgrade/router"
 	"chat_upgrade/usecase"
+	"chat_upgrade/validator"
+	"log"
 	"os"
 
-	"log"
-
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
-	// 環境変数の読み込み
-	if err := godotenv.Load(); err != nil {
-		log.Fatalln(err)
+	// ✅ .env ファイルの読み込み
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
 	}
 
-	// AWSの設定
+	// ✅ AWS 設定の読み込み
 	config := model.Config{
 		AWSAccessKeyID:     os.Getenv("AWS_ACCESS_KEY_ID"),
 		AWSSecretAccessKey: os.Getenv("AWS_SECRET_ACCESS_KEY"),
@@ -31,40 +29,29 @@ func main() {
 		S3Bucket:           os.Getenv("S3_BUCKET"),
 	}
 
-	// 設定の確認用ログ
+	// ✅ 設定の確認用ログ
+	log.Println("AWS の設定:")
 	log.Printf("AWSAccessKeyID: %s", config.AWSAccessKeyID)
-	log.Printf("AWSSecretAccessKey: %s", config.AWSSecretAccessKey)
 	log.Printf("AWSRegion: %s", config.AWSRegion)
 	log.Printf("S3Bucket: %s", config.S3Bucket)
 
-	// データベース接続
-	dbConnection := db.NewDB()
-	defer db.CloseDB(dbConnection)
+	// データベースの初期化
+	db := db.NewDB()
 
-	// リポジトリとユースケースの初期化
-	hubRepository := repository.NewInMemoryHubRepo()
-	hubUsecase := usecase.NewHubUsecase(hubRepository, config)
-	hubController := controller.NewHubController(hubUsecase)
-	fileController := controller.NewFileController(hubUsecase)
+	// バリデーターの初期化
+	userValidator := validator.NewUserValidator()
 
-	userRepository := repository.NewUserRepository(dbConnection)
-	userUsecase := usecase.NewUserUsecase(userRepository)
+	// リポジトリの初期化
+	userRepository := repository.NewUserRepository(db)
+
+	// ユースケースの初期化
+	userUsecase := usecase.NewUserUsecase(userRepository, userValidator)
+
+	// コントローラーの初期化
 	userController := controller.NewUserController(userUsecase)
 
 	// ルーターの設定
-	e := router.NewRouter(hubController, fileController, userController)
-
-	// ミドルウェアの設定
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:3000"},
-		AllowMethods:     []string{echo.GET, echo.POST, echo.OPTIONS},
-		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-		ExposeHeaders:    []string{"Set-Cookie"},
-		AllowCredentials: true,
-	}))
-	e.Use(middleware.BodyLimit("10M")) // 必要に応じてサイズを調整
+	e := router.NewRouter(userController)
 
 	// サーバーの起動
 	e.Logger.Fatal(e.Start(":8080"))
