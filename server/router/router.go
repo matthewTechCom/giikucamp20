@@ -10,7 +10,7 @@ import (
 	echoMiddleware "github.com/labstack/echo/v4/middleware" // Echoのミドルウェアにエイリアスを設定
 )
 
-func NewRouter(uc controller.IUserController) *echo.Echo {
+func NewRouter(uc controller.IUserController,hc controller.IHubController, fc controller.IFileController) *echo.Echo {
 	e := echo.New()
 
 	// CORS 設定
@@ -40,7 +40,9 @@ func NewRouter(uc controller.IUserController) *echo.Echo {
 	e.POST("/login", uc.LogIn)
 	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
-e.GET("/me", uc.Me)
+	e.GET("/me", uc.Me)
+	e.GET("/rooms/:id/ws", hc.ServerWs)
+	e.POST("/upload", fc.UploadFile)
 	// // `/me` に独自ミドルウェアを適用
 	// protected := e.Group("")
 	// protected.Use(customMiddleware.JWTMiddleware) // 独自ミドルウェアを適用

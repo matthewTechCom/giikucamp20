@@ -49,9 +49,13 @@ func main() {
 
 	// コントローラーの初期化
 	userController := controller.NewUserController(userUsecase)
-
+	hubRepository := repository.NewInMemoryHubRepo()
+	hubUsecase := usecase.NewHubUsecase(hubRepository, config)
+	hubController := controller.NewHubController(hubUsecase)
+	fileController := controller.NewFileController(hubUsecase)
+	
 	// ルーターの設定
-	e := router.NewRouter(userController)
+	e := router.NewRouter(userController,hubController, fileController)
 
 	// サーバーの起動
 	e.Logger.Fatal(e.Start(":8080"))

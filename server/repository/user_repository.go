@@ -42,7 +42,7 @@ func (ur *userRepository) CreateUser(user *model.User) error {
 
 // ユーザーのアイコンを更新するメソッド
 func (ur *userRepository) UpdateUserIcon(userID uint, userIcon string) error {
-	if err := ur.db.Model(&model.User{}).Where("id = ?", userID).Update("user_icon", userIcon).Error; err != nil {
+	if err := ur.db.Model(&model.User{}).Where("id = ?", userID).Update("usericon", userIcon).Error; err != nil {
 		return err
 	}
 	return nil
