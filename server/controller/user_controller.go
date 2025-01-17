@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -107,14 +106,17 @@ func (uc *userController) LogOut(c echo.Context) error {
 // コントローラでの修正例（Me エンドポイント）
 // ヘッダーからトークンを取得
 func (uc *userController) Me(c echo.Context) error {
-    tokenStr := c.Request().Header.Get("Authorization")
-    if tokenStr == "" {
+    // Cookieからトークンを取得
+    cookie, err := c.Cookie("token")
+    if err != nil {
         return c.JSON(http.StatusUnauthorized, echo.Map{
             "error": "トークンが提供されていません",
         })
     }
-    tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 
+    tokenStr := cookie.Value
+
+    // トークンの解析と検証
     token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
         if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
             return nil, fmt.Errorf("無効な署名方法")

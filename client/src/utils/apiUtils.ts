@@ -93,15 +93,9 @@ export const logIn = async (
       );
     }
 
-    const data = await loginResponse.json();
-    localStorage.setItem("token", data.token);
-
     // ユーザー情報取得リクエスト
     const userResponse = await fetch(`${API_URL}/me`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${data.token}`, // Authorizationヘッダーにトークンを設定
-      },
       credentials: "include", // Cookieも送信
     });
 
