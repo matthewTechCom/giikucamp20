@@ -14,7 +14,7 @@ const HomePage = () => {
   // Google Maps のスタイルと座標設定
   const containerStyle: React.CSSProperties = {
     width: "400px",
-    height: "700px",
+    height: "900px",
   };
 
   const center = {
@@ -59,16 +59,15 @@ const HomePage = () => {
   return (
     <div className="flex justify-center min-h-screen bg-gray-100">
       <div className="rounded shadow-md w-96 ">
-        <div className="flex p-4 bg-black bg-opacity-80 text-slate-100">
+        <div className="flex p-4 bg-black bg-opacity-80 text-slate-100 justify-between">
         <h1 className="text-2xl font-bold ">MapChat</h1>
         <Image
           src={user.userIcon || "/default-icon.png"}
           alt="ユーザーアイコン"
           width={36}
           height={36}
-          className="rounded-full mx-auto "
+          className="rounded-full"
         />
-        <p className="text-center text-lg">{user.username}</p>
         </div>
         <div className="flex items-center justify-center">
           <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={17}>
@@ -81,6 +80,7 @@ const HomePage = () => {
               }}
               onClick={handleChangeURL}
             />
+            <Marker position={center} label={"テスト1"} />
           </GoogleMap>
         </div>
       </div>
