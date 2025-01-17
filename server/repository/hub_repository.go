@@ -9,6 +9,7 @@ import (
 type IHubRepository interface {
 	GetHub(roomName string) (*model.Hub, bool)
 	CreateHub(roomName string, password string) (*model.Hub, error)
+	DeleteHub(roomName string) error
 }
 
 type inMemoryHubRepo struct {
@@ -38,4 +39,14 @@ func (r *inMemoryHubRepo) CreateHub(roomName string, password string) (*model.Hu
 	hub := model.NewHub(roomName, password)
 	r.hubs[roomName] = hub
 	return hub, nil
+}
+
+func (r *inMemoryHubRepo) DeleteHub(roomName string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, ok := r.hubs[roomName]; !ok {
+		return fmt.Errorf("room does not exist")
+	}
+	delete(r.hubs, roomName)
+	return nil
 }
