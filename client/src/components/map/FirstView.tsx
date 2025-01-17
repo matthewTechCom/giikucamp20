@@ -69,16 +69,18 @@ export const FirstView = () => {
                             <p className="text-center text-xl p-3 font-bold">ルームの作成</p>
                             <div className="m-14">
                                 <p>ルーム名</p>
-                                <input/>
+                                <input type="text"/>
                                 <p>ルームアイコン</p>
-                                <input/>
+                                <input type="file"/>
                                 <p>ルームの説明</p>
-                                <input/>
+                                <input type="text"/>
                                 <p>ルームパスワード</p>
-                                <input/>
+                                <input type="text"/>
                             </div>
-                            <button className="bg-yellow-300 rounded-lg text-black" onClick={() => backStep()}>← 戻る</button>
-                            <button className="bg-yellow-300 rounded-lg text-black" onClick={() => nextStep()}>つづける →</button>
+                            <div className="flex gap-5 items-center justify-center pb-4">
+                                <button className="bg-yellow-300 rounded-lg text-black p-2" onClick={() => backStep()}>← 戻る</button>
+                                <button className="bg-yellow-300 rounded-lg text-black p-2" onClick={() => nextStep()}>つづける →</button>
+                            </div>
                         </div>
                     </div>
                 </div>
