@@ -1,4 +1,5 @@
 import { UserProvider } from "../context/UserContext";
+import {MapProvider} from "@/context/MapContext"
 import "./globals.css";
 
 export default function RootLayout({
@@ -9,7 +10,11 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-        <UserProvider>{children}</UserProvider>
+        <UserProvider>
+          <MapProvider>
+          {children}
+          </MapProvider>
+        </UserProvider>
       </body>
     </html>
   );

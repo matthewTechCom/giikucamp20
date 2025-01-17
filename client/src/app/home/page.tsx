@@ -1,20 +1,34 @@
 "use client";
 import Image from "next/image";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useRouter } from "next/navigation";
+import { FirstView } from "@/components/map/FirstView";
+import { useMapTransactionContext } from "@/context/MapContext";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
 const HomePage = () => {
   const { user, setUser } = useContext(UserContext);
+  const {isFirstViewModal, setIsFirstViewModal} = useMapTransactionContext();
+  const [clickLocation, setClickLocation] = useState<{ lat: number; lng: number } | null>(null);
   const router = useRouter();
+
+  const handleMapClick = (event: google.maps.MapMouseEvent) => {
+    if (event.latLng) {
+      const lat = event.latLng.lat();
+      const lng = event.latLng.lng();
+      setClickLocation({ lat, lng }); // クリックした場所の緯度・経度を保存
+      console.log("クリックした場所:", { lat, lng });
+      alert("クリックした場所は緯度が" + clickLocation?.lat + "緯度が" + clickLocation?.lng + "です")
+    }
+  };
 
   // Google Maps のスタイルと座標設定
   const containerStyle: React.CSSProperties = {
     width: "400px",
-    height: "900px",
+    height: "850px",
   };
 
   const center = {
@@ -57,8 +71,10 @@ const HomePage = () => {
   }
 
   return (
+    <>
     <div className="flex justify-center min-h-screen bg-gray-100">
       <div className="rounded shadow-md w-96 ">
+      {isFirstViewModal && (<FirstView />)}
         <div className="flex p-4 bg-black bg-opacity-80 text-slate-100 justify-between">
         <h1 className="text-2xl font-bold ">MapChat</h1>
         <Image
@@ -70,7 +86,7 @@ const HomePage = () => {
         />
         </div>
         <div className="flex items-center justify-center">
-          <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={17}>
+          <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={17} onClick={handleMapClick}>
             <Marker
               position={positionAkiba}
               label={"秋葉原"}
@@ -83,8 +99,12 @@ const HomePage = () => {
             <Marker position={center} label={"テスト1"} />
           </GoogleMap>
         </div>
+        <div className="absolute bottom-2 left-70">
+          <button className="rounded-full bg-yellow-300 p-5 font-bold" onClick={() => setIsFirstViewModal(true)}>＋</button>
+        </div>
       </div>
     </div>
+    </>
   );
 };
 
