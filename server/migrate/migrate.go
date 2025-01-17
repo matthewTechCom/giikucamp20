@@ -5,9 +5,17 @@ import (
 	"chat_upgrade/model"
 	"fmt"
 	"log"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	//envファイルの読み込み
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	// データベース接続
 	dbConn := db.NewDB()
 
