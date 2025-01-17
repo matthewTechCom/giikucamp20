@@ -32,9 +32,9 @@ export const FirstView = () => {
         ></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50  " >
             {currentStep === 1 && (
-                <div className="bg-gray-800 text-slate-100 min-w-56 bg-opacity-90 px-11  py-72 rounded-md">
-                    <div className="flex flex-col gap-4 mb-4">
-                    <h1 className="font-bold text-4xl m-1">MapChat</h1>
+                <div className="bg-gray-800 text-slate-100 min-w-56 bg-opacity-90 px-11 py-72 rounded-md">
+                    <div className="flex flex-col gap-4 mb-8">
+                    <h1 className="font-bold text-4xl ">MapChat</h1>
                     <p>誰でも簡単に、<br/>近くの人と情報をシェア</p>
                     </div>
                     <div className="bg-gray-500 bg-opacity-40 rounded-lg">
@@ -76,7 +76,8 @@ export const FirstView = () => {
                                 <input/>
                                 <p>ルームパスワード</p>
                                 <input/>
-                            </div><button className="bg-yellow-300 rounded-lg text-black" onClick={() => backStep()}>← 戻る</button>
+                            </div>
+                            <button className="bg-yellow-300 rounded-lg text-black" onClick={() => backStep()}>← 戻る</button>
                             <button className="bg-yellow-300 rounded-lg text-black" onClick={() => nextStep()}>つづける →</button>
                         </div>
                     </div>
