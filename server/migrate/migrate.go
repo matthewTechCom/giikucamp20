@@ -22,6 +22,7 @@ func main() {
 	// defer で順序指定
 	defer fmt.Println("Successfully Migrated")
 	defer db.CloseDB(dbConn)
+	
 
 	// マイグレーションの実行とエラーハンドリング
 	if err := dbConn.AutoMigrate(&model.User{}, &model.Message{}, &model.Room{}); err != nil {

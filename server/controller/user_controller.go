@@ -29,6 +29,7 @@ func NewUserController(uu usecase.IUserUsecase) IUserController {
 }
 
 func (uc *userController) SignUp(c echo.Context) error {
+    // email := c.FormValue("email")
 	username := c.FormValue("username")
 	password := c.FormValue("password")
 	file, err := c.FormFile("file") // 写真データを受け取る
@@ -48,6 +49,7 @@ func (uc *userController) SignUp(c echo.Context) error {
 
 	// ユーザー情報を作成
 	user := model.User{
+        // Email:email,
 		Username: username,
 		Password: password,
 		UserIcon: userIconURL,
@@ -167,7 +169,9 @@ func (uc *userController) Me(c echo.Context) error {
     }
 
     return c.JSON(http.StatusOK, model.UserResponse{
+
         ID:       user.ID,
+        // Email :user.Email,
         Username: user.Username,
         UserIcon: user.UserIcon,
     })

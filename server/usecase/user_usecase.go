@@ -45,6 +45,7 @@ func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
     }
 
     newUser := model.User{
+        // Email: user.Email,
         Username: user.Username,
         Password: string(hash),
         UserIcon: user.UserIcon,
@@ -55,6 +56,7 @@ func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
     
     resUser := model.UserResponse{
         ID:       newUser.ID,
+        // Email: newUser.Email,
         Username: newUser.Username,
         UserIcon: newUser.UserIcon,
     }
