@@ -95,7 +95,7 @@ const HomePage = () => {
         <h1 className="text-2xl font-bold ">MapChat</h1>
         <Image
           src={user.userIcon || "/default-icon.png"}
-          alt="ユーザーアイコン"
+          alt="ユ"
           width={36}
           height={36}
           className="rounded-full"
@@ -115,7 +115,7 @@ const HomePage = () => {
             <Marker position={center} label={"テスト1"} />
           </GoogleMap>
         </div>
-        <div className="absolute bottom-2 left-70">
+        <div className="absolute bottom-14 left-70">
           <button className="rounded-full bg-yellow-300 p-5 font-bold" onClick={() => setIsFirstViewModal(true)}>＋</button>
         </div>
       </div>

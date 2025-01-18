@@ -86,8 +86,8 @@ export const FirstView = () => {
                 </div>
             )}
             {currentStep === 3 && (
-                <div className="">
-                    <button className="bg-yellow-300 rounded-lg text-black p-3" onClick={() => submitDatas()}>チャットを作りたい場所を選択してください</button>
+                <div className="absolute top-80 -right-32 w-60">
+                    <button className="bg-yellow-300 bg-opacity-90 rounded-lg text-black text-sm p-3" onClick={() => submitDatas()}>チャットを作りたい場所を選択してください</button>
                 </div>
             )}
         </div>
