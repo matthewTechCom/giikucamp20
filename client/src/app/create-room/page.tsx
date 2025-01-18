@@ -167,6 +167,7 @@ export default function CreateRoomPage() {
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
               className="w-full p-2 text-black"
+              required
             />
           </div>
           <div className="mb-4">
@@ -200,12 +201,14 @@ export default function CreateRoomPage() {
               value={roomPass}
               onChange={(e) => setRoomPass(e.target.value)}
               className="w-full p-2 text-black"
+              required
             />
           </div>
           <div className="flex justify-center gap-5">
             <button
               className="bg-yellow-300 text-black px-4 py-2 rounded-lg font-semibold"
               onClick={() => setCurrentStep(3)}
+              disabled={!roomName || !roomPass}
             >
               つづける →
             </button>
