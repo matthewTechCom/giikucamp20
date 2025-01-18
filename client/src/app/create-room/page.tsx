@@ -86,7 +86,7 @@ export default function CreateRoomPage() {
             style={{ objectFit: "cover" }}
           />
         </div>
-        <div className="flex w-full max-w-lg justify-between px-4 mb-4">
+        <div className="flex w-full justify-between px-4 mb-4">
           <h2 className="text-2xl font-bold">ルームを作成する</h2>
           <button
             className="bg-yellow-300 text-black font-semibold px-4 py-2 rounded-lg"
