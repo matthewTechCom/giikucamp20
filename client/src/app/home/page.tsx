@@ -32,7 +32,7 @@ export default function HomePage() {
         />
       </div>
       <div className="mx-4 mb-8 text-left">
-        <h1 className="text-4xl font-bold mb-2">MapChat</h1>
+        <h1 className="text-5xl font-bold mb-2">MapChat</h1>
         <p>
           誰でも簡単に、
           <br />
