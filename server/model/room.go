@@ -12,3 +12,10 @@ type Room struct {
 	Longitude   float64   `json:"longitude"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+// 部屋情報のレスポンス用構造体（クライアントに返すデータ）
+type RoomResponse struct {
+	ID       uint   `json:"id"`
+	Roomname string `json:"roomname"`
+	RoomIcon string `json:"roomIcon"` // クライアントに返すときにユーザーアイコンも含める
+}

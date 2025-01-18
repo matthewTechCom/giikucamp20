@@ -10,7 +10,12 @@ import (
 	echoMiddleware "github.com/labstack/echo/v4/middleware" // Echoのミドルウェアにエイリアスを設定
 )
 
-func NewRouter(uc controller.IUserController,hc controller.IHubController, fc controller.IFileController) *echo.Echo {
+func NewRouter(
+	uc controller.IUserController,
+	hc controller.IHubController,
+	fc controller.IFileController,
+	rc controller.IRoomController,
+) *echo.Echo {
 	e := echo.New()
 
 	// CORS 設定
@@ -18,7 +23,7 @@ func NewRouter(uc controller.IUserController,hc controller.IHubController, fc co
 		AllowOrigins: []string{"http://localhost:3000", os.Getenv("FE_URL")},
 		AllowHeaders: []string{
 			echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept,
-			echo.HeaderAccessControlAllowHeaders, echo.HeaderXCSRFToken,echo.HeaderAuthorization, 
+			echo.HeaderAccessControlAllowHeaders, echo.HeaderXCSRFToken, echo.HeaderAuthorization,
 		},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE"},
 		AllowCredentials: true,
@@ -29,10 +34,10 @@ func NewRouter(uc controller.IUserController,hc controller.IHubController, fc co
 		CookiePath:     "/",
 		CookieDomain:   os.Getenv("API_DOMAIN"),
 		CookieHTTPOnly: true,
-		CookieSameSite:  //http.SameSiteNoneMode,
-		http.SameSiteDefaultMode,
+		// CookieSameSite の設定
+		CookieSameSite: http.SameSiteDefaultMode,
 		CookieMaxAge:   3600,
-		CookieSecure:   false, 
+		CookieSecure:   false,
 	}))
 
 	// ユーザー関連のエンドポイント
@@ -41,12 +46,14 @@ func NewRouter(uc controller.IUserController,hc controller.IHubController, fc co
 	e.POST("/logout", uc.LogOut)
 	e.GET("/csrf", uc.CsrfToken)
 	e.GET("/me", uc.Me)
+
+	// ルーム関連のエンドポイント
+	e.POST("/registerRoom", rc.RegisterRoom)
+	e.GET("/rooms", rc.GetAllRooms) // フロントに全データを返すルート
+
+	// WebSocket 接続用（チャット用）
 	e.GET("/rooms/:id/ws", hc.ServerWs)
 	e.POST("/upload", fc.UploadFile)
-	// // `/me` に独自ミドルウェアを適用
-	// protected := e.Group("")
-	// protected.Use(customMiddleware.JWTMiddleware) // 独自ミドルウェアを適用
-	// protected.GET("/me", uc.Me)
 
 	return e
 }

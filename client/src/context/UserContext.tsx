@@ -4,7 +4,6 @@ import { createContext, ReactNode, useState } from "react";
 
 export interface User {
   id: number;
-  // email: string;
   username: string;
   userIcon: string | undefined;
 }

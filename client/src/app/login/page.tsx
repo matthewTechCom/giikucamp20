@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
+import { SiGooglemaps } from "react-icons/si";
 import { UserContext } from "../../context/UserContext";
 import { logIn } from "../../utils/apiUtils";
 
@@ -41,11 +42,14 @@ const LoginPage = () => {
   return (
     <div
       className="relative min-h-screen bg-center bg-cover text-white"
-      style={{ backgroundImage: "url('/models/mapimage.png')" }}
+      style={{ backgroundImage: "url('/models/mapimage2.jpg')" }}
     >
       <div className="absolute inset-0 bg-black bg-opacity-40"></div>
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="text-4xl font-bold mb-8">MapChat</div>
+        <div className="flex items-center text-4xl font-bold mb-8">
+          <SiGooglemaps className="text-[#DB4437] mr-2" />
+          <span className="text-yellow-400">MapChat</span>
+        </div>
         <div className="bg-gray-800 bg-opacity-70 rounded-lg shadow-md p-8 w-full max-w-md">
           <h2 className="text-xl font-semibold mb-6 text-center">Login</h2>
 
@@ -72,14 +76,7 @@ const LoginPage = () => {
           <form onSubmit={handleLogin}>
             <label className="block mb-4">
               <span className="block mb-2">ユーザー名</span>
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="mb-4 p-2 w-full border rounded text-black"
-                required
-              />
+              <input type="text" />
             </label>
 
             <label className="block mb-4">
