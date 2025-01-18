@@ -47,8 +47,9 @@ func NewRouter(
 	e.GET("/csrf", uc.CsrfToken)
 	e.GET("/me", uc.Me)
 
-	// ルーム登録エンドポイント
+	// ルーム関連のエンドポイント
 	e.POST("/registerRoom", rc.RegisterRoom)
+	e.GET("/rooms", rc.GetAllRooms) // フロントに全データを返すルート
 
 	// WebSocket 接続用（チャット用）
 	e.GET("/rooms/:id/ws", hc.ServerWs)

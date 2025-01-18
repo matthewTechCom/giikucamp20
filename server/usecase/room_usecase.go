@@ -14,6 +14,12 @@ type IRoomUsecase interface {
 	RegisterRoom(roomName, password, description, latitudeStr, longitudeStr string) (*model.Room, error)
 	GetRoomByName(roomName string) (*model.Room, error)
 	DeleteOldRooms() error
+	GetAllRooms() ([]model.Room, error) // 新規追加
+}
+
+// すべての部屋情報を返すメソッド
+func (ru *roomUsecase) GetAllRooms() ([]model.Room, error) {
+	return ru.rr.GetAllRooms()
 }
 
 // IRoomUsecase の実装構造体

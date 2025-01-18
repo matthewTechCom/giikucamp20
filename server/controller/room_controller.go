@@ -11,6 +11,7 @@ import (
 type IRoomController interface {
 	RegisterRoom(c echo.Context) error
 	GetRoomByName(c echo.Context) error
+	GetAllRooms(c echo.Context) error
 }
 
 type roomController struct {
@@ -22,6 +23,17 @@ func NewRoomController(ru usecase.IRoomUsecase) IRoomController {
 	return &roomController{
 		ru: ru,
 	}
+}
+
+// すべての部屋データを取得するハンドラ
+func (rc *roomController) GetAllRooms(c echo.Context) error {
+	rooms, err := rc.ru.GetAllRooms()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+	return c.JSON(http.StatusOK, rooms)
 }
 
 // フォームから送信された部屋登録情報を元に部屋を登録するエンドポイント

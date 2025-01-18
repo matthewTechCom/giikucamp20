@@ -13,6 +13,7 @@ type IRoomRepository interface {
 	CreateRoom(room *model.Room) error
 	GetRoomByName(roomName string) (*model.Room, bool)
 	DeleteOldRooms() error
+	GetAllRooms() ([]model.Room, error)
 }
 
 type roomRepository struct {
@@ -56,4 +57,13 @@ func (rr *roomRepository) DeleteOldRooms() error {
 		return err
 	}
 	return nil
+}
+
+// すべての部屋情報を取得するメソッド
+func (rr *roomRepository) GetAllRooms() ([]model.Room, error) {
+	var rooms []model.Room
+	if err := rr.db.Find(&rooms).Error; err != nil {
+		return nil, err
+	}
+	return rooms, nil
 }
