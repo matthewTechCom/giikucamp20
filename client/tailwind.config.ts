@@ -13,7 +13,16 @@ const config: Config = {
         foreground: "var(--foreground)",
       },
       screens: {
-        'iphone': {'max': '450px'}, // iPhoneのPro Maxのサイズ以下
+        iphone: { max: "450px" }, // iPhoneのPro Maxのサイズ以下
+      },
+      height: {
+        screen: "100dvh",
+      },
+      minHeight: {
+        screen: "100dvh",
+      },
+      maxHeight: {
+        screen: "100dvh",
       },
     },
   },
