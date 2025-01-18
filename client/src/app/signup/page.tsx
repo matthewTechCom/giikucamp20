@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signUp } from "../../utils/apiUtils";
+import Image from "next/image";
 
 const SignUpPage = () => {
   const [username, setUsername] = useState("");
@@ -35,16 +36,30 @@ const SignUpPage = () => {
   };
 
   return (
-    <div
-      className="relative min-h-screen bg-center bg-cover text-white"
-      style={{ backgroundImage: "url('/models/mapimage2.jpg')" }}
-    >
-      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="text-4xl font-bold mb-8 text-yellow-400">MapChat</div>
-        <div className="bg-gray-800 bg-opacity-70 rounded-lg shadow-md p-8 w-full max-w-md">
-          <h2 className="text-xl font-semibold mb-6 text-center">Sign Up</h2>
+    <div className="flex flex-col items-left justify-center min-h-screen bg-black text-slate-100 bg-opacity-80">
+      <div className="fixed inset-0 h-screen -z-10">
+        <Image
+          alt="background"
+          src="/images/background.png"
+          quality={100}
+          fill
+          style={{ objectFit: "cover" }}
+        />
+      </div>
+      <div className="mx-4 mb-8 text-left">
+        <h1 className="text-5xl font-bold mb-2">MapChat</h1>
+        <p>
+          誰でも簡単に、
+          <br />
+          近くの人と情報をシェア
+        </p>
+      </div>
+      <div className="flex w-full justify-between px-4 mb-4">
+        <h2 className="text-2xl font-bold">ユーザー登録</h2>
+      </div>
 
+      <div className="mx-4 bg-white bg-opacity-20 rounded-2xl p-10 backdrop-blur-sm shadow-lg border-white border-opacity-20 border">
+        <div className="flex flex-col">
           {errorMessage && (
             <div
               className="mb-4 text-red-500 text-sm"
@@ -54,38 +69,35 @@ const SignUpPage = () => {
               {errorMessage}
             </div>
           )}
-
           <form onSubmit={handleSignUp}>
-            <label className="block mb-4">
-              <span className="block mb-2">User Name</span>
+            <div className="mb-4">
+              <label className="block mb-1 font-bold">ユーザー名</label>
               <input
                 type="text"
                 placeholder="ユーザー名"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="mb-4 p-2 w-full border rounded text-black"
+                className="w-full p-2 text-black"
                 required
               />
-            </label>
-
-            <label className="block mb-4">
-              <span className="block mb-2">Password</span>
+            </div>
+            <div className="mb-4">
+              <label className="block mb-1 font-bold">パスワード</label>
               <input
                 type="password"
                 placeholder="パスワード"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mb-4 p-2 w-full border rounded text-black"
+                className="w-full p-2 text-black"
                 required
               />
-            </label>
-
-            <label className="block mb-4">
-              <span className="block mb-2">User Icon</span>
-
-              <div className="border-2 border-dashed border-gray-300 rounded p-4 flex items-center justify-center cursor-pointer bg-gray-100">
+            </div>
+            <div className="mb-10">
+              <label className="block mb-2 font-bold">ユーザーアイコン</label>
+              <div className="border-2 border-dashed border-gray-300 rounded p-4 bg-gray-100">
                 <input
                   type="file"
+                  placeholder="ユーザーアイコン"
                   onChange={(e) =>
                     setUserIcon(e.target.files ? e.target.files[0] : null)
                   }
@@ -93,15 +105,16 @@ const SignUpPage = () => {
                   accept="image/*"
                 />
               </div>
-            </label>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-2 text-white bg-blue-500 hover:bg-blue-600 rounded text-center transition-colors"
-            >
-              {isLoading ? "処理中..." : "サインアップ"}
-            </button>
+            </div>
+            <div className="flex justify-center gap-5">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="bg-yellow-300 text-black px-4 py-2 rounded-lg font-semibold"
+              >
+                {isLoading ? "処理中..." : "サインアップ"}
+              </button>
+            </div>
           </form>
         </div>
       </div>

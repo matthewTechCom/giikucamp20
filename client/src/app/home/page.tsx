@@ -15,11 +15,6 @@ export default function HomePage() {
   useEffect(() => {
     const loadUser = async () => {
       if (!user) {
-        setUser({
-          id: 1,
-          username: "もち",
-          userIcon: "",
-        })
         try {
           const userData = await fetchUser();
           setUser(userData);
