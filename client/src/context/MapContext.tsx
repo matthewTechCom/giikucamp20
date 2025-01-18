@@ -6,8 +6,8 @@ interface RoomState{
     roomIcon: File | null,
     roomDetail: string,
     roomPassword: string,
-    roomLongitude: number,
-    roomLatitude: number,
+    roomLongitude: number | null,
+    roomLatitude: number | null,
 }
 
 type AppProviderProps = {

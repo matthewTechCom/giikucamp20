@@ -6,15 +6,13 @@ import { UserContext } from "@/context/UserContext";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import Image from "next/image";
 import { useMapTransactionContext } from "@/context/MapContext";
-import { useNavigate } from "react-router-dom";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
 export default function CreateRoomPage() {
   const router = useRouter();
-  const { user } = useContext(UserContext);
-  const { roomInfo } = useMapTransactionContext();
-  const navigate = useNavigate();
+  const { user, setUser } = useContext(UserContext);
+  const { roomInfo, setRoomInfo } = useMapTransactionContext();
 
   // ステップ管理: 2(情報入力) or 3(地図選択)
   const [currentStep, setCurrentStep] = useState<number>(2);
@@ -23,6 +21,7 @@ export default function CreateRoomPage() {
   const [roomName, setRoomName] = useState("");
   const [roomDesc, setRoomDesc] = useState("");
   const [roomPass, setRoomPass] = useState("");
+  const [roomIcon, setRoomIcon] = useState<File | null>(null);
 
   // 地図関連
   const [clickLocation, setClickLocation] = useState<{
@@ -36,6 +35,11 @@ export default function CreateRoomPage() {
   const center = { lat: 35.69575, lng: 139.77521 };
 
   if (!user) {
+    setUser({
+      id: 1,
+      username: "もち",
+      userIcon: "",
+    })
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         ログインしてください。
@@ -56,7 +60,6 @@ export default function CreateRoomPage() {
       const lat = event.latLng.lat();
       const lng = event.latLng.lng();
       setClickLocation({ lat, lng });
-      alert(`クリックした場所: (${lat}, ${lng})`);
     }
   };
 
@@ -67,14 +70,24 @@ export default function CreateRoomPage() {
       return;
     }
     try {
+      setRoomInfo({
+        roomName: roomName,
+        roomIcon: roomIcon,
+        roomDetail: roomDesc,
+        roomPassword: roomPass,
+        roomLongitude: clickLocation!.lng,
+        roomLatitude: clickLocation!.lat,
+      })
+
+      console.log(roomInfo)
       const formData = new FormData();
 
       // フォームデータに値を追加
       formData.append("roomName", roomInfo.roomName);
       formData.append("password", roomInfo.roomPassword);
       formData.append("description", roomInfo.roomDetail);
-      formData.append("latitude", roomInfo.roomLatitude.toString());
-      formData.append("longitude", roomInfo.roomLongitude.toString());
+      formData.append("latitude", clickLocation.lat.toString());
+      formData.append("longitude", clickLocation.lng.toString());
 
       // roomIconが存在する場合に追加
       if (roomInfo.roomIcon) {
@@ -101,7 +114,7 @@ export default function CreateRoomPage() {
       alert("リクエストの送信中にエラーが発生しました。");
     }
     alert("ルームを作成しました！");
-    navigate(`/chat?room=${encodeURIComponent(roomInfo.roomName.trim())}&password=${encodeURIComponent(roomInfo.roomPassword.trim())}`)
+    router.push(`/chat?room=${encodeURIComponent(roomInfo.roomName.trim())}&password=${encodeURIComponent(roomInfo.roomPassword.trim())}`)
   };
 
   // Step2画面: ルーム情報入力
@@ -142,6 +155,10 @@ export default function CreateRoomPage() {
               type="file"
               className="w-full p-4 text-slate-100 bg-black bg-opacity-50"
               accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files ? e.target.files[0] : null;
+                setRoomIcon(file);
+              }}
             />
           </div>
           <div className="mb-4">
