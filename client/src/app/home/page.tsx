@@ -6,6 +6,7 @@ import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import { useRouter } from "next/navigation";
 import { FirstView } from "@/components/map/FirstView";
 import { useMapTransactionContext } from "@/context/MapContext";
+import { useEffect } from "react";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
@@ -13,6 +14,10 @@ const HomePage = () => {
   const { user, setUser } = useContext(UserContext);
   const {isFirstViewModal, setIsFirstViewModal} = useMapTransactionContext();
   const [clickLocation, setClickLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [containerStyle, setContainerStyle] = useState<React.CSSProperties>({
+    width: "400px",
+    height: "800px",
+  });
   const router = useRouter();
 
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
@@ -25,11 +30,22 @@ const HomePage = () => {
     }
   };
 
-  // Google Maps のスタイルと座標設定
-  const containerStyle: React.CSSProperties = {
-    width: "400px",
-    height: "850px",
-  };
+
+  useEffect(() => {
+    const updateContainerStyle = () => {
+      const width = window.innerWidth;
+      setContainerStyle({
+        width: "400px",
+        height: width <= 450 ? "500px" : "800px", // 画面幅によって高さを変更
+      });
+    };
+
+    // 初期化とリサイズイベントの設定
+    updateContainerStyle();
+    window.addEventListener("resize", updateContainerStyle);
+
+    return () => window.removeEventListener("resize", updateContainerStyle);
+  }, []);
 
   const center = {
     lat: 35.69575,
