@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { FaFileImport } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { TbLogout2 } from "react-icons/tb";
+import { getCsrfToken } from "@/utils/apiUtils";
 
 // Next.js のルーターと検索パラメータ取得フックを使用
 import { useRouter, useSearchParams } from "next/navigation";
@@ -238,10 +239,16 @@ const Chat: React.FC = () => {
       try {
         const formData = new FormData();
         formData.append("file", selectedFile);
-
+        console.log(selectedFile)
+        const csrfToken = await getCsrfToken();
         const response = await axios.post<UploadResponse>(
           "http://localhost:8080/upload",
-          formData
+          formData,
+          { withCredentials: true,
+            headers: {
+              "X-CSRF-Token": csrfToken, // CSRFトークンをヘッダーに追加
+            },
+           }
         );
         const fileUrl = response.data.url;
 
