@@ -5,12 +5,15 @@ import (
 	"chat_upgrade/repository"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 )
 
 // 部屋登録に関するビジネスロジックのインターフェース
 type IRoomUsecase interface {
 	RegisterRoom(roomName, password, description, latitudeStr, longitudeStr string) (*model.Room, error)
+	GetRoomByName(roomName string) (*model.Room, error)
+	DeleteOldRooms() error
 }
 
 // IRoomUsecase の実装構造体
@@ -32,12 +35,12 @@ func (ru *roomUsecase) RegisterRoom(roomName, password, description, latitudeStr
 		return nil, fmt.Errorf("room already exists: %s", roomName)
 	}
 
-	lat, err := parseStringToFloat(latitudeStr)
+	lat, err := strconv.ParseFloat(latitudeStr, 64)
 	if err != nil {
 		log.Printf("invalid latitude: %v", err)
 		return nil, err
 	}
-	lon, err := parseStringToFloat(longitudeStr)
+	lon, err := strconv.ParseFloat(longitudeStr, 64)
 	if err != nil {
 		log.Printf("invalid longitude: %v", err)
 		return nil, err
@@ -59,9 +62,16 @@ func (ru *roomUsecase) RegisterRoom(roomName, password, description, latitudeStr
 	return room, nil
 }
 
-// 文字列を float64 に変換するヘルパーメソッド
-func parseStringToFloat(s string) (float64, error) {
-	var f float64
-	_, err := fmt.Sscanf(s, "%f", &f)
-	return f, err
+// 部屋名で部屋情報を取得するメソッド
+func (ru *roomUsecase) GetRoomByName(roomName string) (*model.Room, error) {
+	room, found := ru.rr.GetRoomByName(roomName)
+	if !found {
+		return nil, fmt.Errorf("room not found: %s", roomName)
+	}
+	return room, nil
+}
+
+// 実装に削除メソッドを追加
+func (ru *roomUsecase) DeleteOldRooms() error {
+	return ru.rr.DeleteOldRooms()
 }

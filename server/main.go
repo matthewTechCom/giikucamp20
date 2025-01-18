@@ -10,6 +10,7 @@ import (
 	"chat_upgrade/validator"
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 )
@@ -60,7 +61,7 @@ func main() {
 	fileController := controller.NewFileController(hubUsecase)
 
 	// ルーム関連の初期化
-	roomRepository := repository.NewRoomRepository()
+	roomRepository := repository.NewRoomRepository(db) // db を渡す
 	roomUsecase := usecase.NewRoomUsecase(roomRepository)
 	roomController := controller.NewRoomController(roomUsecase)
 
@@ -69,4 +70,21 @@ func main() {
 
 	// サーバーの起動
 	e.Logger.Fatal(e.Start(":8080"))
+
+	// 定期実行タスクの開始
+	scheduleRoomCleanup(roomUsecase)
+}
+
+func scheduleRoomCleanup(rc usecase.IRoomUsecase) {
+	ticker := time.NewTicker(1 * time.Hour) // 1時間ごとに実行
+	go func() {
+		for range ticker.C {
+			err := rc.DeleteOldRooms()
+			if err != nil {
+				log.Printf("古い部屋の削除に失敗しました: %v\n", err)
+			} else {
+				log.Println("古い部屋を削除しました")
+			}
+		}
+	}()
 }
