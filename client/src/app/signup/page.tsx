@@ -5,101 +5,143 @@ import { useState } from "react";
 import { signUp } from "../../utils/apiUtils";
 
 const SignUpPage = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [userIcon, setUserIcon] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false); // ローディング状態
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // エラーメッセージ
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true); // ローディング開始
-    setErrorMessage(null); // エラーリセット
     try {
-      // サインアップAPI呼び出し
-      await signUp(username, password, userIcon);
+      await signUp(email, password, username, userIcon);
       alert("サインアップ成功！");
-      setUsername(""); // フォームリセット
+      setEmail("");
       setPassword("");
+      setUsername(""); // フォームのリセット
       setUserIcon(null);
       router.push("/login");
     } catch (error) {
       console.error("SignUp Error:", error);
-      // エラーメッセージを設定
       const errorMessage =
         (error as Error).message || "サインアップに失敗しました。";
-      setErrorMessage(errorMessage);
+      alert(errorMessage);
     } finally {
       setIsLoading(false); // ローディング終了
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSignUp}
-        className="bg-white p-8 rounded shadow-md w-96"
-      >
-        <h1 className="text-2xl font-bold mb-6">サインアップ</h1>
-        {errorMessage && (
-          <div
-            className="mb-4 text-red-500 text-sm"
-            role="alert"
-            aria-live="assertive"
-          >
-            {errorMessage}
-          </div>
-        )}
-        <label htmlFor="username" className="block mb-1 text-sm font-semibold">
-          ユーザー名
-        </label>
-        <input
-          id="username"
-          type="text"
-          placeholder="ユーザー名"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="mb-4 p-2 w-full border rounded"
-          aria-label="ユーザー名"
-          required
-        />
-        <label htmlFor="password" className="block mb-1 text-sm font-semibold">
-          パスワード
-        </label>
-        <input
-          id="password"
-          type="password"
-          placeholder="パスワード"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 p-2 w-full border rounded"
-          aria-label="パスワード"
-          required
-        />
-        <label htmlFor="userIcon" className="block mb-1 text-sm font-semibold">
-          プロフィール画像
-        </label>
-        <input
-          id="userIcon"
-          type="file"
-          onChange={(e) =>
-            setUserIcon(e.target.files ? e.target.files[0] : null)
-          }
-          className="mb-4"
-          aria-label="プロフィール画像"
-          accept="image/*"
-        />
-        <button
-          type="submit"
-          className="bg-blue-500 text-white py-2 px-4 rounded w-full"
-          disabled={isLoading} // ローディング中はボタンを無効化
-          aria-label="サインアップボタン"
-        >
-          {isLoading ? "処理中..." : "サインアップ"}
-        </button>
-      </form>
+    <div
+      className="relative min-h-screen bg-center bg-cover text-white"
+      style={{ backgroundImage: "url('../../public/models/mapimage.png')" }}
+    >
+      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="text-4xl font-bold mb-8">MapChat</div>
+        <div className="bg-gray-800 bg-opacity-70 rounded-lg shadow-md p-8 w-full max-w-md">
+          <h2 className="text-xl font-semibold mb-6 text-center">SignUp</h2>
+          <form onSubmit={handleSignUp}>
+            <label className="block mb-4">
+              <span className="block mb-2">Email</span>
+              <input
+                type="text"
+                placeholder="パスワード"
+                value={email}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mb-4 p-2 w-full border rounded"
+              />
+            </label>
+
+            <label className="block mb-4">
+              <span className="block mb-2">Password</span>
+              <input
+                type="text"
+                placeholder="パスワード"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mb-4 p-2 w-full border rounded"
+              />
+            </label>
+
+            <label className="block mb-4">
+              <span className="block mb-2">UserName</span>
+              <input
+                type="text"
+                placeholder="ユーザー名"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="mb-4 p-2 w-full border rounded"
+              />
+            </label>
+
+            <label className="block mb-4">
+              <span className="block mb-2">userIcon</span>
+              <div className="border-2 border-dashed border-gray-300 rounded p-4 flex items-center justify-center cursor-pointer bg-gray-100">
+                <input
+                  type="file"
+                  onChange={(e) =>
+                    setUserIcon(e.target.files ? e.target.files[0] : null)
+                  }
+                  className="text-black"
+                />
+              </div>
+            </label>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="
+                w-full py-2 text-white 
+                bg-yellow-500 hover:bg-yellow-600 
+                rounded text-center transition-colors
+              "
+            >
+              {isLoading ? "処理中..." : "サインアップ"}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
+
+    // <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    //   <form
+    //     onSubmit={handleSignUp}
+    //     className="bg-white p-8 rounded shadow-md w-96"
+    //   >
+    //     <h1 className="text-2xl font-bold mb-6">サインアップ</h1>
+    //     <input
+    //       type="text"
+    //       placeholder="ユーザー名"
+    //       value={username}
+    //       onChange={(e) => setUsername(e.target.value)}
+    //       className="mb-4 p-2 w-full border rounded"
+    //     />
+    //     <input
+    //       type="password"
+    //       placeholder="パスワード"
+    //       value={password}
+    //       onChange={(e) => setPassword(e.target.value)}
+    //       className="mb-4 p-2 w-full border rounded"
+    //     />
+    //     <input
+    //       type="file"
+    //       onChange={(e) =>
+    //         setUserIcon(e.target.files ? e.target.files[0] : null)
+    //       }
+    //       className="mb-4"
+    //     />
+    //     <button
+    //       type="submit"
+    //       className="bg-blue-500 text-white py-2 px-4 rounded w-full"
+    //       disabled={isLoading} // ローディング中はボタンを無効化
+    //     >
+    //       {isLoading ? "処理中..." : "サインアップ"}
+    //     </button>
+    //   </form>
+    // </div>
   );
 };
 

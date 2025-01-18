@@ -1,8 +1,12 @@
+'use client'
+
+import { ThreeModel } from "@/components/ThreeModel";
 import Link from "next/link";
 
 const HomePage = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-yellow-300 to-red-400">
+      <ThreeModel />
       {/* タイトルのアニメーション */}
       <h1 className="text-6xl font-extrabold text-white mb-8">
         <span className="inline-block animate-bounce delay-1000">M</span>

@@ -23,19 +23,21 @@ export const getCsrfToken = async (): Promise<string> => {
 
 // ✅ サインアップ処理
 export const signUp = async (
-  username: string,
+  email: string,
   password: string,
-  userIcon: File | null // 修正: 型を File | null に変更
+  username: string,
+  userIcon: File | null
 ): Promise<void> => {
   try {
     const csrfToken = await getCsrfToken();
 
     const formData = new FormData();
-    formData.append("username", username);
+    formData.append("email", email);
     formData.append("password", password);
+    formData.append("username", username);
 
     if (userIcon) {
-      formData.append("file", userIcon); // バックエンドが期待するキー名
+      formData.append("usericon", userIcon);
     }
 
     const response = await fetch(`${API_URL}/signup`, {
@@ -44,7 +46,7 @@ export const signUp = async (
         "X-CSRF-Token": csrfToken,
       },
       body: formData,
-      credentials: "include",
+      credentials: "include", // Cookieを送信
     });
 
     if (!response.ok) {
@@ -61,16 +63,15 @@ export const signUp = async (
   }
 };
 
-// ✅ ユーザー情報の型定義
+// ユーザー情報の型定義
 export interface UserResponse {
   id: number;
   username: string;
-  userIcon: string; // 修正: 常に string を期待
+  userIcon?: string; // ユーザーアイコンが必須でない場合
 }
 
-// ✅ ログイン処理
 export const logIn = async (
-  username: string,
+  email: string,
   password: string
 ): Promise<UserResponse> => {
   try {
@@ -83,8 +84,8 @@ export const logIn = async (
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
       },
-      body: JSON.stringify({ username, password }),
-      credentials: "include",
+      body: JSON.stringify({ email, password }),
+      credentials: "include", // Cookieを送信
     });
 
     if (!loginResponse.ok) {
@@ -97,7 +98,7 @@ export const logIn = async (
     // ユーザー情報取得リクエスト
     const userResponse = await fetch(`${API_URL}/me`, {
       method: "GET",
-      credentials: "include",
+      credentials: "include", // Cookieも送信
     });
 
     if (!userResponse.ok) {
@@ -105,7 +106,6 @@ export const logIn = async (
     }
 
     const userData: UserResponse = await userResponse.json();
-
     console.log("ログイン成功:", userData);
     return userData;
   } catch (error) {
