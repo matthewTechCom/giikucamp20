@@ -1,39 +1,78 @@
-'use client'
+"use client";
 
 import { ThreeModel } from "@/components/ThreeModel";
 import Link from "next/link";
 
 const HomePage = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-yellow-300 to-red-400">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-yellow-200 to-red-300">
       <ThreeModel />
+
       {/* タイトルのアニメーション */}
-      <h1 className="text-6xl font-extrabold text-white mb-8">
-        <span className="inline-block animate-bounce delay-1000">M</span>
-        <span className="inline-block animate-bounce delay-1100">a</span>
-        <span className="inline-block animate-bounce delay-1200">p</span>
-        <span className="inline-block animate-bounce delay-1300">C</span>
-        <span className="inline-block animate-bounce delay-1400">h</span>
-        <span className="inline-block animate-bounce delay-1500">a</span>
-        <span className="inline-block animate-bounce delay-1600">t</span>
+      <h1
+        className="text-6xl font-extrabold text-white mb-8"
+        style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
+      >
+        <span
+          className="inline-block animate-pulse delay-1000 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"
+          style={{ animationDuration: "2s" }}
+        >
+          M
+        </span>
+        <span
+          className="inline-block animate-pulse delay-1100 text-transparent bg-clip-text bg-gradient-to-r from-green-600 via-yellow-500 to-orange-500"
+          style={{ animationDuration: "2.2s" }}
+        >
+          a
+        </span>
+        <span
+          className="inline-block animate-pulse delay-1200 text-transparent bg-clip-text bg-gradient-to-r from-pink-600 via-red-500 to-purple-600"
+          style={{ animationDuration: "2.4s" }}
+        >
+          p
+        </span>
+        <span
+          className="inline-block animate-pulse delay-1300 text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-indigo-500 to-purple-600"
+          style={{ animationDuration: "2.6s" }}
+        >
+          C
+        </span>
+        <span
+          className="inline-block animate-pulse delay-1400 text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-yellow-500 to-green-500"
+          style={{ animationDuration: "2.8s" }}
+        >
+          h
+        </span>
+        <span
+          className="inline-block animate-pulse delay-1500 text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-pink-500 to-purple-600"
+          style={{ animationDuration: "3s" }}
+        >
+          a
+        </span>
+        <span
+          className="inline-block animate-pulse delay-1600 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-teal-400 to-green-500"
+          style={{ animationDuration: "3.2s" }}
+        >
+          t
+        </span>
       </h1>
 
       {/* 説明テキスト */}
       <p className="text-xl text-white mb-6 animate__animated animate__fadeIn animate__delay-2s">
-        ここの見出しの文章を考えてほしい！
+        あなたの場所とチャットをつなげる新しい体験を！
       </p>
 
       {/* ボタン */}
       <div className="flex justify-center gap-6 animate__animated animate__fadeIn animate__delay-3s">
         <Link
           href="/signup"
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-700"
+          className="bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-800"
         >
           サインアップ
         </Link>
         <Link
           href="/login"
-          className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-green-700"
+          className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-green-800"
         >
           ログイン
         </Link>

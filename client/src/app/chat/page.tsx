@@ -1,13 +1,15 @@
 // src/pages/Chat.tsx
-import React, { useEffect, useState, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { ChatMessage, SetUserMessage } from "@/types";
+"use client";
+
 import Message from "@/components/Message";
-import { FaFileImport } from "react-icons/fa";
+import { ChatMessage, SetUserMessage } from "@/types";
+import axios from "axios";
 import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
+import { FaFileImport } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { TbLogout2 } from "react-icons/tb";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type UserResponse = {
   username: string;
@@ -47,16 +49,14 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     if (!roomName || !password) {
-      navigate("/rooms");
+      navigate("/home");
       return;
     }
 
     const fetchUserAndConnect = async () => {
       try {
         // 1) ユーザー情報をバックエンドから取得
-        const res = await axios.get<UserResponse>(
-          "http://localhost:8080/getuserinfo"
-        );
+        const res = await axios.get<UserResponse>("http://localhost:8080/me");
         // res.data が UserResponse であることを TS に伝えて格納
         setUser(res.data);
 
@@ -157,7 +157,7 @@ const Chat: React.FC = () => {
                 // ERROR メッセージの場合
                 const { message } = msg;
                 alert(`エラー: ${message}`);
-                navigate("/rooms");
+                navigate("/home");
                 break;
               }
               default:
@@ -183,7 +183,7 @@ const Chat: React.FC = () => {
       } catch (error) {
         console.error("Failed to fetch user info or connect websocket:", error);
         alert("ユーザー情報の取得、またはWebSocket接続に失敗しました。");
-        navigate("/rooms");
+        navigate("/home");
       }
     };
 
@@ -268,7 +268,7 @@ const Chat: React.FC = () => {
   // 退室ボタン
   const handleLeave = () => {
     socketRef.current?.close();
-    navigate("/rooms");
+    navigate("/home");
   };
 
   return (
