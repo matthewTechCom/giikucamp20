@@ -31,14 +31,26 @@ func NewUserController(uu usecase.IUserUsecase) IUserController {
 func (uc *userController) SignUp(c echo.Context) error {
 	username := c.FormValue("username")
 	password := c.FormValue("password")
+	file, err := c.FormFile("file") // 写真データを受け取る
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "写真データが提供されていません")
+	}
 
 	if username == "" || password == "" {
 		return c.JSON(http.StatusBadRequest, "username と password は必須です")
 	}
 
+	// 写真をアップロードしてURLを取得
+	userIconURL, err := uc.uu.UploadUserIcon(file)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "写真のアップロードに失敗しました")
+	}
+
+	// ユーザー情報を作成
 	user := model.User{
 		Username: username,
 		Password: password,
+		UserIcon: userIconURL,
 	}
 
 	userRes, err := uc.uu.SignUp(user)
@@ -48,6 +60,7 @@ func (uc *userController) SignUp(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, userRes)
 }
+
 
 func (uc *userController) LogIn(c echo.Context) error {
     user := model.User{}

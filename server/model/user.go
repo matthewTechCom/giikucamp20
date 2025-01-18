@@ -8,7 +8,7 @@ type User struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Username  string    `gorm:"unique;not null" json:"username"`
 	Password  string    `gorm:"not null" json:"password"`
-	UserIcon  string    `gorm:"column:user_icon" json:"user_icon"` // カラム名に合わせて変更
+	UserIcon  string    `gorm:"column:user_icon" json:"userIcon"` // カラム名に合わせて変更
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -18,5 +18,5 @@ type User struct {
 type UserResponse struct {
 	ID       uint   `json:"id"`
 	Username string `json:"username"`
-	UserIcon string `json:"user_icon"`  // クライアントに返すときにユーザーアイコンも含める
+	UserIcon string `json:"userIcon"`  // クライアントに返すときにユーザーアイコンも含める
 }

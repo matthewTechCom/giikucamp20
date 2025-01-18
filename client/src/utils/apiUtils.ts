@@ -23,16 +23,18 @@ export const getCsrfToken = async (): Promise<string> => {
 
 // ✅ サインアップ処理
 export const signUp = async (
-  username: string,
+  email: string,
   password: string,
+  username: string,
   userIcon: File | null
 ): Promise<void> => {
   try {
     const csrfToken = await getCsrfToken();
 
     const formData = new FormData();
-    formData.append("username", username);
+    formData.append("email", email);
     formData.append("password", password);
+    formData.append("username", username);
 
     if (userIcon) {
       formData.append("usericon", userIcon);
@@ -69,7 +71,7 @@ export interface UserResponse {
 }
 
 export const logIn = async (
-  username: string,
+  email: string,
   password: string
 ): Promise<UserResponse> => {
   try {
@@ -82,7 +84,7 @@ export const logIn = async (
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
       credentials: "include", // Cookieを送信
     });
 
