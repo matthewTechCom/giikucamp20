@@ -6,6 +6,7 @@ import { UserContext } from "@/context/UserContext";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import Image from "next/image";
 import { useMapTransactionContext } from "@/context/MapContext";
+import { useNavigate } from "react-router-dom";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
@@ -13,6 +14,7 @@ export default function CreateRoomPage() {
   const router = useRouter();
   const { user } = useContext(UserContext);
   const { roomInfo } = useMapTransactionContext();
+  const navigate = useNavigate();
 
   // ステップ管理: 2(情報入力) or 3(地図選択)
   const [currentStep, setCurrentStep] = useState<number>(2);
@@ -99,7 +101,7 @@ export default function CreateRoomPage() {
       alert("リクエストの送信中にエラーが発生しました。");
     }
     alert("ルームを作成しました！");
-    router.push("/home");
+    navigate(`/chat?room=${encodeURIComponent(roomInfo.roomName.trim())}&password=${encodeURIComponent(roomInfo.roomPassword.trim())}`)
   };
 
   // Step2画面: ルーム情報入力
