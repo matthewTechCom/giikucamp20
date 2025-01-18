@@ -109,7 +109,7 @@ DB_NAME=giikucamp
 5. データベースのマイグレーションを実行します。
 
    ```bash
-   go run migrate/migrate.go
+   go run migrate/migrate.go /.env
    ```
 
 6. サーバーが正常に起動した場合、以下の URL にアクセスできます。
