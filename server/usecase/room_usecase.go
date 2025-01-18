@@ -5,6 +5,7 @@ import (
 	"chat_upgrade/repository"
 	"fmt"
 	"log"
+	"mime/multipart"
 	"strconv"
 	"time"
 )
@@ -14,7 +15,8 @@ type IRoomUsecase interface {
 	RegisterRoom(roomName, password, description, latitudeStr, longitudeStr string) (*model.Room, error)
 	GetRoomByName(roomName string) (*model.Room, error)
 	DeleteOldRooms() error
-	GetAllRooms() ([]model.Room, error) // 新規追加
+	GetAllRooms() ([]model.Room, error)
+	UpdateRoomImage(roomID uint, file *multipart.FileHeader) error
 }
 
 // すべての部屋情報を返すメソッド
@@ -24,14 +26,32 @@ func (ru *roomUsecase) GetAllRooms() ([]model.Room, error) {
 
 // IRoomUsecase の実装構造体
 type roomUsecase struct {
-	rr repository.IRoomRepository
+	rr  repository.IRoomRepository
+	s3r repository.IS3Repository
 }
 
 // roomUsecase のインスタンスを生成する
-func NewRoomUsecase(rr repository.IRoomRepository) IRoomUsecase {
+func NewRoomUsecase(rr repository.IRoomRepository, s3r repository.IS3Repository) IRoomUsecase {
 	return &roomUsecase{
-		rr: rr,
+		rr:  rr,
+		s3r: s3r,
 	}
+}
+
+// 部屋画像をアップロードして更新するメソッド
+func (ru *roomUsecase) UpdateRoomImage(roomID uint, file *multipart.FileHeader) error {
+	// S3にアップロード
+	imageURL, err := ru.s3r.UploadFile(file)
+	if err != nil {
+		return err
+	}
+
+	// データベースにURLを格納
+	if err := ru.rr.UpdateRoomImage(roomID, imageURL); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // フォームなどから受け取った情報で部屋を登録するメソッド

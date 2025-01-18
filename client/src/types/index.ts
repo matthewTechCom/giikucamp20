@@ -1,6 +1,7 @@
 // サインアップ/ログインのレスポンス型
 export interface AuthResponse {
   id: number;
+  // email: string;
   username: string;
   userIcon: string; // サーバーが返すフィールド名に合わせる
 }
@@ -8,6 +9,7 @@ export interface AuthResponse {
 // ✅ ユーザー情報のレスポンス型を修正
 export interface UserResponse {
   id: number;
+  // email: string;
   username: string;
   userIcon: string; // フィールド名を統一
 }

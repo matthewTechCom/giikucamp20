@@ -5,7 +5,7 @@ import { createContext, ReactNode, useState } from "react";
 export interface User {
   id: number;
   username: string;
-  userIcon: string | undefined 
+  userIcon: string | undefined;
 }
 
 type UserContextType = {

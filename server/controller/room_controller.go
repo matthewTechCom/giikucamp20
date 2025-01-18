@@ -3,6 +3,7 @@ package controller
 import (
 	"chat_upgrade/usecase"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -12,6 +13,7 @@ type IRoomController interface {
 	RegisterRoom(c echo.Context) error
 	GetRoomByName(c echo.Context) error
 	GetAllRooms(c echo.Context) error
+	UpdateRoomImage(c echo.Context) error
 }
 
 type roomController struct {
@@ -23,6 +25,28 @@ func NewRoomController(ru usecase.IRoomUsecase) IRoomController {
 	return &roomController{
 		ru: ru,
 	}
+}
+
+// 部屋画像をアップロードして更新するエンドポイント
+func (rc *roomController) UpdateRoomImage(c echo.Context) error {
+	roomID := c.Param("roomID")
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ファイルが見つかりません"})
+	}
+
+	// roomIDを数値に変換
+	id, err := strconv.Atoi(roomID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "無効なroomIDです"})
+	}
+
+	// 画像をアップロードして更新
+	if err := rc.ru.UpdateRoomImage(uint(id), file); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "画像を更新しました"})
 }
 
 // すべての部屋データを取得するハンドラ

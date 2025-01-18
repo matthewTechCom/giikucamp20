@@ -14,10 +14,18 @@ type IRoomRepository interface {
 	GetRoomByName(roomName string) (*model.Room, bool)
 	DeleteOldRooms() error
 	GetAllRooms() ([]model.Room, error)
+	UpdateRoomImage(roomID uint, imageURL string) error
 }
 
 type roomRepository struct {
 	db *gorm.DB
+}
+
+func (rr *roomRepository) UpdateRoomImage(roomID uint, imageURL string) error {
+	if err := rr.db.Model(&model.Room{}).Where("id = ?", roomID).Update("room_image", imageURL).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 // roomRepository のインスタンスを返すメソッド
