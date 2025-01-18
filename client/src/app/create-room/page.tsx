@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useContext } from "react";
-import { useRouter } from "next/navigation";
+import { useMapTransactionContext } from "@/context/MapContext";
 import { UserContext } from "@/context/UserContext";
+import { getCsrfToken } from "@/utils/apiUtils";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import Image from "next/image";
-import { useMapTransactionContext } from "@/context/MapContext";
+import { useRouter } from "next/navigation";
+import { useContext, useState } from "react";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
@@ -69,7 +70,11 @@ export default function CreateRoomPage() {
       alert("マップ上でルームの場所を選択してください");
       return;
     }
+
     try {
+      // CSRFトークンを取得
+      const csrfToken = await getCsrfToken();
+
       setRoomInfo({
         roomName: roomName,
         roomIcon: roomIcon,
@@ -80,23 +85,25 @@ export default function CreateRoomPage() {
       });
 
       console.log(roomInfo);
-      const formData = new FormData();
 
-      // フォームデータに値を追加
+      const formData = new FormData();
       formData.append("roomName", roomInfo.roomName);
       formData.append("password", roomInfo.roomPassword);
       formData.append("description", roomInfo.roomDetail);
       formData.append("latitude", clickLocation.lat.toString());
       formData.append("longitude", clickLocation.lng.toString());
 
-      // roomIconが存在する場合に追加
       if (roomInfo.roomIcon) {
         formData.append("roomIcon", roomInfo.roomIcon);
       }
 
       const response = await fetch("http://localhost:8080/registerRoom", {
         method: "POST",
-        body: formData, // FormDataをそのまま送信
+        credentials: "include",
+        headers: {
+          "X-CSRF-Token": csrfToken, // CSRFトークンを追加
+        },
+        body: formData,
       });
 
       if (!response.ok) {
@@ -109,10 +116,16 @@ export default function CreateRoomPage() {
       const result = await response.json();
       console.log("成功:", result);
       alert("部屋が登録されました！");
+      router.push(
+        `/chat?room=${encodeURIComponent(
+          roomInfo.roomName.trim()
+        )}&password=${encodeURIComponent(roomInfo.roomPassword.trim())}`
+      );
     } catch (error) {
       console.error("リクエストエラー:", error);
       alert("リクエストの送信中にエラーが発生しました。");
     }
+
     alert("ルームを作成しました！");
     router.push(
       `/chat?room=${encodeURIComponent(
