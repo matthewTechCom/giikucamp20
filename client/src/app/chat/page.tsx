@@ -1,9 +1,9 @@
 // src/pages/Chat.tsx
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
 import { FaFileImport } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { TbLogout2 } from "react-icons/tb";
@@ -62,7 +62,16 @@ const Chat: React.FC = () => {
     const fetchUserAndConnect = async () => {
       try {
         // 1) ユーザー情報をバックエンドから取得
-        const res = await axios.get<UserResponse>("http://localhost:8080/me");
+        const res = await axios.get<UserResponse>("http://localhost:8080/me", {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true, // 必要に応じてクッキーを送信
+        });
+
+        if (!res.data || !res.data.username || !res.data.userIcon) {
+          throw new Error("不正なユーザー情報が返されました");
+        }
         setUser(res.data);
 
         // 2) WebSocket 接続
@@ -192,7 +201,7 @@ const Chat: React.FC = () => {
     return () => {
       socketRef.current?.close();
     };
-  }, [router, roomName, password]);
+  }, []);
 
   // メッセージ追加時に自動スクロール
   useEffect(() => {

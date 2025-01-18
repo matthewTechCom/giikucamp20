@@ -71,18 +71,20 @@ export default function CreateRoomPage() {
       return;
     }
 
+    const newRoomInfo = {
+      roomName: roomName,
+      roomIcon: roomIcon,
+      roomDetail: roomDesc,
+      roomPassword: roomPass,
+      roomLongitude: clickLocation!.lng,
+      roomLatitude: clickLocation!.lat,
+    };
+
     try {
       // CSRFトークンを取得
       const csrfToken = await getCsrfToken();
 
-      setRoomInfo({
-        roomName: roomName,
-        roomIcon: roomIcon,
-        roomDetail: roomDesc,
-        roomPassword: roomPass,
-        roomLongitude: clickLocation!.lng,
-        roomLatitude: clickLocation!.lat,
-      });
+      setRoomInfo(newRoomInfo);
 
       console.log(roomInfo);
 
