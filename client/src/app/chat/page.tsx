@@ -1,15 +1,18 @@
 // src/pages/Chat.tsx
 "use client";
 
-import Message from "@/components/Message";
-import { ChatMessage, SetUserMessage } from "@/types";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
-import React, { useEffect, useRef, useState } from "react";
 import { FaFileImport } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { TbLogout2 } from "react-icons/tb";
-import { useNavigate, useSearchParams } from "react-router-dom";
+
+// Next.js のルーターと検索パラメータ取得フックを使用
+import { useRouter, useSearchParams } from "next/navigation";
+
+import Message from "@/components/Message";
+import { ChatMessage, SetUserMessage } from "@/types";
 
 type UserResponse = {
   username: string;
@@ -25,8 +28,10 @@ type UploadResponse = {
 };
 
 const Chat: React.FC = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  // useRouter で画面遷移を制御
+  const router = useRouter();
+  // useSearchParams で URL 検索パラメータを取得
+  const searchParams = useSearchParams();
   const roomName = searchParams.get("room") || "";
   const password = searchParams.get("password") || "";
 
@@ -48,8 +53,9 @@ const Chat: React.FC = () => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    // roomName / password が無い場合はホームにリダイレクト
     if (!roomName || !password) {
-      navigate("/home");
+      router.push("/home");
       return;
     }
 
@@ -57,7 +63,6 @@ const Chat: React.FC = () => {
       try {
         // 1) ユーザー情報をバックエンドから取得
         const res = await axios.get<UserResponse>("http://localhost:8080/me");
-        // res.data が UserResponse であることを TS に伝えて格納
         setUser(res.data);
 
         // 2) WebSocket 接続
@@ -86,14 +91,13 @@ const Chat: React.FC = () => {
             switch (msg.type) {
               case "MSG": {
                 const { username, userIcon, text } = msg;
-                // userIcon が undefined の場合、'' に置き換え
                 const icon = userIcon ?? "";
                 setMessages((prev) => [
                   ...prev,
                   {
                     type: "MSG",
                     username,
-                    userIcon: icon, // ここは必ず string
+                    userIcon: icon,
                     text,
                   },
                 ]);
@@ -102,14 +106,13 @@ const Chat: React.FC = () => {
 
               case "FILE": {
                 const { username, userIcon, fileUrl, fileName } = msg;
-                // userIcon が undefined の場合、'' に置き換え
                 const icon = userIcon ?? "";
                 setMessages((prev) => [
                   ...prev,
                   {
                     type: "FILE",
                     username,
-                    userIcon: icon, // ここも必ず string
+                    userIcon: icon,
                     fileUrl,
                     fileName,
                   },
@@ -117,12 +120,10 @@ const Chat: React.FC = () => {
                 break;
               }
               case "JOIN": {
-                // JOIN メッセージの場合
                 const { username, userIcon, text } = msg;
                 setJoinedUsers((prev) => {
                   const exists = prev.some((u) => u.username === username);
                   if (!exists) {
-                    // userIcon が undefined の場合、空文字に置換
                     const icon = userIcon ?? "";
                     return [...prev, { username, userIcon: icon }];
                   }
@@ -138,7 +139,6 @@ const Chat: React.FC = () => {
                 break;
               }
               case "LEAVE": {
-                // LEAVE メッセージの場合
                 const { username, text } = msg;
                 setJoinedUsers((prev) =>
                   prev.filter((u) => u.username !== username)
@@ -154,10 +154,9 @@ const Chat: React.FC = () => {
               }
 
               case "ERROR": {
-                // ERROR メッセージの場合
                 const { message } = msg;
                 alert(`エラー: ${message}`);
-                navigate("/home");
+                router.push("/home");
                 break;
               }
               default:
@@ -183,7 +182,7 @@ const Chat: React.FC = () => {
       } catch (error) {
         console.error("Failed to fetch user info or connect websocket:", error);
         alert("ユーザー情報の取得、またはWebSocket接続に失敗しました。");
-        navigate("/home");
+        router.push("/home");
       }
     };
 
@@ -193,7 +192,7 @@ const Chat: React.FC = () => {
     return () => {
       socketRef.current?.close();
     };
-  }, [navigate, roomName, password]);
+  }, [router, roomName, password]);
 
   // メッセージ追加時に自動スクロール
   useEffect(() => {
@@ -202,20 +201,17 @@ const Chat: React.FC = () => {
 
   // メッセージ送信処理
   const handleSend = async () => {
-    // WebSocket 未接続の場合
     if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
       alert("WebSocketが接続されていません");
       return;
     }
-    // ユーザー情報が無い場合
     if (!user) {
       alert("ユーザー情報を取得できていません");
       return;
     }
-    // 入力もファイルも無い場合
     if (!inputText.trim() && !selectedFile) return;
 
-    // 1) テキストメッセージ
+    // テキストメッセージ送信
     if (inputText.trim()) {
       socketRef.current.send(
         JSON.stringify({
@@ -228,13 +224,12 @@ const Chat: React.FC = () => {
       setInputText("");
     }
 
-    // 2) ファイルアップロード
+    // ファイル送信
     if (selectedFile) {
       try {
         const formData = new FormData();
         formData.append("file", selectedFile);
 
-        // /upload から返ってくる url の型をアサート
         const response = await axios.post<UploadResponse>(
           "http://localhost:8080/upload",
           formData
@@ -268,7 +263,7 @@ const Chat: React.FC = () => {
   // 退室ボタン
   const handleLeave = () => {
     socketRef.current?.close();
-    navigate("/home");
+    router.push("/home");
   };
 
   return (
