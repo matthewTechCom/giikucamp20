@@ -3,7 +3,8 @@ package usecase
 import (
 	"chat_upgrade/model"
 	"chat_upgrade/repository"
-	"fmt"
+
+	// "fmt"
 	"log"
 	"mime/multipart"
 	"strconv"
@@ -13,7 +14,7 @@ import (
 // 部屋登録に関するビジネスロジックのインターフェース
 type IRoomUsecase interface {
 	RegisterRoom(roomName, password, description, latitudeStr, longitudeStr string) (*model.Room, error)
-	GetRoomByName(roomName string) (*model.Room, error)
+	// GetRoomByName(roomName string) (*model.Room, error)
 	DeleteOldRooms() error
 	GetAllRooms() ([]model.Room, error)
 	UpdateRoomImage(roomID uint, file *multipart.FileHeader) error
@@ -57,9 +58,9 @@ func (ru *roomUsecase) UpdateRoomImage(roomID uint, file *multipart.FileHeader) 
 // フォームなどから受け取った情報で部屋を登録するメソッド
 func (ru *roomUsecase) RegisterRoom(roomName, password, description, latitudeStr, longitudeStr string) (*model.Room, error) {
 	// 既存の部屋が存在しないかチェック
-	if _, found := ru.rr.GetRoomByName(roomName); found {
-		return nil, fmt.Errorf("room already exists: %s", roomName)
-	}
+	// if _, found := ru.rr.GetRoomByName(roomName); found {
+	// 	return nil, fmt.Errorf("room already exists: %s", roomName)
+	// }
 
 	lat, err := strconv.ParseFloat(latitudeStr, 64)
 	if err != nil {
@@ -89,13 +90,13 @@ func (ru *roomUsecase) RegisterRoom(roomName, password, description, latitudeStr
 }
 
 // 部屋名で部屋情報を取得するメソッド
-func (ru *roomUsecase) GetRoomByName(roomName string) (*model.Room, error) {
-	room, found := ru.rr.GetRoomByName(roomName)
-	if !found {
-		return nil, fmt.Errorf("room not found: %s", roomName)
-	}
-	return room, nil
-}
+// func (ru *roomUsecase) GetRoomByName(roomName string) (*model.Room, error) {
+// 	room, found := ru.rr.GetRoomByName(roomName)
+// 	if !found {
+// 		return nil, fmt.Errorf("room not found: %s", roomName)
+// 	}
+// 	return room, nil
+// }
 
 // 実装に削除メソッドを追加
 func (ru *roomUsecase) DeleteOldRooms() error {

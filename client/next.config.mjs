@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   images: {
     domains: ["2025hakkasonn01.s3.ap-northeast-1.amazonaws.com"], // S3のドメインを追加
   },

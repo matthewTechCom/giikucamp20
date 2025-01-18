@@ -6,7 +6,7 @@ import { getCsrfToken } from "@/utils/apiUtils";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
@@ -35,12 +35,19 @@ export default function CreateRoomPage() {
   // 地図の中心
   const center = { lat: 35.69575, lng: 139.77521 };
 
+  // ユーザーが存在しない場合は useEffect でセットする
+  useEffect(() => {
+    if (!user) {
+      setUser({
+        id: 1,
+        username: "もち",
+        userIcon: "",
+      });
+    }
+  }, [user, setUser]);
+
+  // ユーザー情報がない場合は読み込み中、またはログイン促しの表示をする
   if (!user) {
-    setUser({
-      id: 1,
-      username: "もち",
-      userIcon: "",
-    });
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         ログインしてください。
@@ -76,8 +83,8 @@ export default function CreateRoomPage() {
       roomIcon: roomIcon,
       roomDetail: roomDesc,
       roomPassword: roomPass,
-      roomLongitude: clickLocation!.lng,
-      roomLatitude: clickLocation!.lat,
+      roomLongitude: clickLocation.lng,
+      roomLatitude: clickLocation.lat,
     };
 
     try {
@@ -86,24 +93,24 @@ export default function CreateRoomPage() {
 
       setRoomInfo(newRoomInfo);
 
-      console.log(roomInfo);
+      console.log(newRoomInfo);
 
       const formData = new FormData();
-      formData.append("roomName", roomInfo.roomName);
-      formData.append("password", roomInfo.roomPassword);
-      formData.append("description", roomInfo.roomDetail);
+      formData.append("roomName", newRoomInfo.roomName);
+      formData.append("password", newRoomInfo.roomPassword);
+      formData.append("description", newRoomInfo.roomDetail);
       formData.append("latitude", clickLocation.lat.toString());
       formData.append("longitude", clickLocation.lng.toString());
 
-      if (roomInfo.roomIcon) {
-        formData.append("roomIcon", roomInfo.roomIcon);
+      if (newRoomInfo.roomIcon) {
+        formData.append("roomIcon", newRoomInfo.roomIcon);
       }
 
       const response = await fetch("http://localhost:8080/registerRoom", {
         method: "POST",
         credentials: "include",
         headers: {
-          "X-CSRF-Token": csrfToken, // CSRFトークンを追加
+          "X-CSRF-Token": csrfToken,
         },
         body: formData,
       });
@@ -120,20 +127,13 @@ export default function CreateRoomPage() {
       alert("部屋が登録されました！");
       router.push(
         `/chat?room=${encodeURIComponent(
-          roomInfo.roomName.trim()
-        )}&password=${encodeURIComponent(roomInfo.roomPassword.trim())}`
+          newRoomInfo.roomName.trim()
+        )}&password=${encodeURIComponent(newRoomInfo.roomPassword.trim())}`
       );
     } catch (error) {
       console.error("リクエストエラー:", error);
       alert("リクエストの送信中にエラーが発生しました。");
     }
-
-    alert("ルームを作成しました！");
-    router.push(
-      `/chat?room=${encodeURIComponent(
-        roomInfo.roomName.trim()
-      )}&password=${encodeURIComponent(roomInfo.roomPassword.trim())}`
-    );
   };
 
   // Step2画面: ルーム情報入力

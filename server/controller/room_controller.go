@@ -11,7 +11,7 @@ import (
 // 部屋登録のエンドポイントを管理するためのインターフェース
 type IRoomController interface {
 	RegisterRoom(c echo.Context) error
-	GetRoomByName(c echo.Context) error
+	// GetRoomByName(c echo.Context) error
 	GetAllRooms(c echo.Context) error
 	UpdateRoomImage(c echo.Context) error
 }
@@ -86,22 +86,22 @@ func (rc *roomController) RegisterRoom(c echo.Context) error {
 }
 
 // 部屋名で部屋情報を取得するエンドポイント
-func (rc *roomController) GetRoomByName(c echo.Context) error {
-	roomName := c.Param("roomName")
+// func (rc *roomController) GetRoomByName(c echo.Context) error {
+// 	roomName := c.Param("roomName")
 
-	if roomName == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "roomName は必須です"})
-	}
+// 	if roomName == "" {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "roomName は必須です"})
+// 	}
 
-	room, err := rc.ru.GetRoomByName(roomName)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "ルームが見つかりません: " + err.Error()})
-	}
+// 	room, err := rc.ru.GetRoomByName(roomName)
+// 	if err != nil {
+// 		return c.JSON(http.StatusNotFound, map[string]string{"error": "ルームが見つかりません: " + err.Error()})
+// 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"room": room,
-	})
-}
+// 	return c.JSON(http.StatusOK, map[string]interface{}{
+// 		"room": room,
+// 	})
+// }
 
 // 古い部屋を削除するエンドポイント
 func (rc *roomController) DeleteOldRooms(c echo.Context) error {

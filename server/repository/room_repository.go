@@ -2,7 +2,6 @@ package repository
 
 import (
 	"chat_upgrade/model"
-	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -11,7 +10,7 @@ import (
 // 部屋情報を管理するインターフェース
 type IRoomRepository interface {
 	CreateRoom(room *model.Room) error
-	GetRoomByName(roomName string) (*model.Room, bool)
+	// GetRoomByName(roomName string) (*model.Room, bool)
 	DeleteOldRooms() error
 	GetAllRooms() ([]model.Room, error)
 	UpdateRoomImage(roomID uint, imageURL string) error
@@ -37,9 +36,9 @@ func NewRoomRepository(db *gorm.DB) IRoomRepository {
 
 // 新規部屋を作成するメソッド
 func (rr *roomRepository) CreateRoom(room *model.Room) error {
-	if err := rr.db.Where("room_name = ?", room.RoomName).First(&model.Room{}).Error; err == nil {
-		return errors.New("room already exists")
-	}
+	// if err := rr.db.Where("room_name = ?", room.RoomName).First(&model.Room{}).Error; err == nil {
+	// 	return errors.New("room already exists")
+	// }
 	if err := rr.db.Create(room).Error; err != nil {
 		return err
 	}
@@ -47,16 +46,16 @@ func (rr *roomRepository) CreateRoom(room *model.Room) error {
 }
 
 // 指定された部屋名の部屋情報を返すメソッド
-func (rr *roomRepository) GetRoomByName(roomName string) (*model.Room, bool) {
-	var room model.Room
-	if err := rr.db.Where("room_name = ?", roomName).First(&room).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, false
-		}
-		return nil, false
-	}
-	return &room, true
-}
+// func (rr *roomRepository) GetRoomByName(roomName string) (*model.Room, bool) {
+// 	var room model.Room
+// 	if err := rr.db.Where("room_name = ?", roomName).First(&room).Error; err != nil {
+// 		if errors.Is(err, gorm.ErrRecordNotFound) {
+// 			return nil, false
+// 		}
+// 		return nil, false
+// 	}
+// 	return &room, true
+// }
 
 // 24時間前の部屋を削除するメソッド
 func (rr *roomRepository) DeleteOldRooms() error {
