@@ -57,7 +57,7 @@ const LoginPage = () => {
         </p>
       </div>
       <div className="flex w-full justify-between px-4 mb-4">
-        <h2 className="text-2xl font-bold">ユーザー登録</h2>
+        <h2 className="text-2xl font-bold">ユーザーログイン</h2>
       </div>
       <div className="mx-4 bg-white bg-opacity-20 rounded-2xl p-10 backdrop-blur-sm shadow-lg border-white border-opacity-20 border">
         <div className="flex flex-col">
@@ -99,7 +99,7 @@ const LoginPage = () => {
                 disabled={isLoading}
                 className="bg-yellow-300 text-black px-4 py-2 rounded-lg font-semibold"
               >
-                {isLoading ? "処理中..." : "サインアップ"}
+                {isLoading ? "処理中..." : "ログイン"}
               </button>
             </div>
           </form>

@@ -58,7 +58,7 @@ const HomePage = () => {
       </h1>
 
       {/* 説明テキスト */}
-      <p className="text-xl text-white mb-6 animate__animated animate__fadeIn animate__delay-2s">
+      <p className="text-xl font-bold text-white mb-6 animate__animated animate__fadeIn animate__delay-2s">
         あなたの場所とチャットをつなげる新しい体験を！
       </p>
 

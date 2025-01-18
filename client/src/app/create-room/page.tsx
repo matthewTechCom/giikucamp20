@@ -39,7 +39,7 @@ export default function CreateRoomPage() {
       id: 1,
       username: "もち",
       userIcon: "",
-    })
+    });
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         ログインしてください。
@@ -64,7 +64,7 @@ export default function CreateRoomPage() {
   };
 
   // ルーム作成確定
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     if (!clickLocation) {
       alert("マップ上でルームの場所を選択してください");
       return;
@@ -77,9 +77,9 @@ export default function CreateRoomPage() {
         roomPassword: roomPass,
         roomLongitude: clickLocation!.lng,
         roomLatitude: clickLocation!.lat,
-      })
+      });
 
-      console.log(roomInfo)
+      console.log(roomInfo);
       const formData = new FormData();
 
       // フォームデータに値を追加
@@ -114,7 +114,11 @@ export default function CreateRoomPage() {
       alert("リクエストの送信中にエラーが発生しました。");
     }
     alert("ルームを作成しました！");
-    router.push(`/chat?room=${encodeURIComponent(roomInfo.roomName.trim())}&password=${encodeURIComponent(roomInfo.roomPassword.trim())}`)
+    router.push(
+      `/chat?room=${encodeURIComponent(
+        roomInfo.roomName.trim()
+      )}&password=${encodeURIComponent(roomInfo.roomPassword.trim())}`
+    );
   };
 
   // Step2画面: ルーム情報入力
@@ -144,6 +148,7 @@ export default function CreateRoomPage() {
             <label className="block mb-1 font-bold">ルーム名</label>
             <input
               type="text"
+              placeholder="ルーム名"
               value={roomName}
               onChange={(e) => setRoomName(e.target.value)}
               className="w-full p-2 text-black"
@@ -153,7 +158,8 @@ export default function CreateRoomPage() {
             <label className="block mb-1 font-bold">ルームアイコン</label>
             <input
               type="file"
-              className="w-full p-4 text-slate-100 bg-black bg-opacity-50"
+              placeholder="ルームアイコン"
+              className="border-2 border-dashed border-gray-300 rounded p-4 bg-gray-100 w-full"
               accept="image/*"
               onChange={(e) => {
                 const file = e.target.files ? e.target.files[0] : null;
@@ -165,6 +171,7 @@ export default function CreateRoomPage() {
             <label className="block mb-1 font-bold">ルームの説明</label>
             <input
               type="text"
+              placeholder="ルームの説明"
               value={roomDesc}
               onChange={(e) => setRoomDesc(e.target.value)}
               className="w-full p-2 text-black"
@@ -174,6 +181,7 @@ export default function CreateRoomPage() {
             <label className="block mb-1 font-bold">ルームパスワード</label>
             <input
               type="password"
+              placeholder="ルームパスワード"
               value={roomPass}
               onChange={(e) => setRoomPass(e.target.value)}
               className="w-full p-2 text-black"
