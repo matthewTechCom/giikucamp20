@@ -51,7 +51,7 @@ const SignUpPage = () => {
                 placeholder="パスワード"
                 value={email}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mb-4 p-2 w-full border rounded"
+                className="mb-4 p-2 w-full border rounded text-black"
               />
             </label>
 
@@ -62,7 +62,7 @@ const SignUpPage = () => {
                 placeholder="パスワード"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mb-4 p-2 w-full border rounded"
+                className="mb-4 p-2 w-full border rounded text-black"
               />
             </label>
 
@@ -73,7 +73,7 @@ const SignUpPage = () => {
                 placeholder="ユーザー名"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="mb-4 p-2 w-full border rounded"
+                className="mb-4 p-2 w-full border rounded text-black"
               />
             </label>
 
