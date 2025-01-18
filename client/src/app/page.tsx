@@ -66,13 +66,13 @@ const HomePage = () => {
       <div className="flex justify-center gap-6 animate__animated animate__fadeIn animate__delay-3s">
         <Link
           href="/signup"
-          className="bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-blue-800"
+          className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-3 rounded-full font-semibold text-lg shadow-lg transition-transform transform hover:scale-110 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300"
         >
           サインアップ
         </Link>
         <Link
           href="/login"
-          className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold text-lg shadow-lg transition-transform transform hover:scale-105 hover:bg-green-800"
+          className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-8 py-3 rounded-full font-semibold text-lg shadow-lg transition-transform transform hover:scale-110 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-teal-300"
         >
           ログイン
         </Link>
