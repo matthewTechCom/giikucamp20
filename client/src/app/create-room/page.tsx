@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/UserContext";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
 import Image from "next/image";
+import { useMapTransactionContext } from "@/context/MapContext";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
 export default function CreateRoomPage() {
   const router = useRouter();
   const { user } = useContext(UserContext);
+  const { roomInfo } = useMapTransactionContext();
 
   // ステップ管理: 2(情報入力) or 3(地図選択)
   const [currentStep, setCurrentStep] = useState<number>(2);
@@ -57,18 +59,45 @@ export default function CreateRoomPage() {
   };
 
   // ルーム作成確定
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
     if (!clickLocation) {
       alert("マップ上でルームの場所を選択してください");
       return;
     }
-    // 実際にはサーバーへルーム情報をPOSTなど
-    console.log({
-      roomName,
-      roomDesc,
-      roomPass,
-      clickLocation,
-    });
+    try {
+      const formData = new FormData();
+
+      // フォームデータに値を追加
+      formData.append("roomName", roomInfo.roomName);
+      formData.append("password", roomInfo.roomPassword);
+      formData.append("description", roomInfo.roomDetail);
+      formData.append("latitude", roomInfo.roomLatitude.toString());
+      formData.append("longitude", roomInfo.roomLongitude.toString());
+
+      // roomIconが存在する場合に追加
+      if (roomInfo.roomIcon) {
+        formData.append("roomIcon", roomInfo.roomIcon);
+      }
+
+      const response = await fetch("http://localhost:8080/registerRoom", {
+        method: "POST",
+        body: formData, // FormDataをそのまま送信
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error:", errorData);
+        alert(`エラーが発生しました: ${errorData.error}`);
+        return;
+      }
+
+      const result = await response.json();
+      console.log("成功:", result);
+      alert("部屋が登録されました！");
+    } catch (error) {
+      console.error("リクエストエラー:", error);
+      alert("リクエストの送信中にエラーが発生しました。");
+    }
     alert("ルームを作成しました！");
     router.push("/home");
   };
