@@ -41,13 +41,13 @@ const LoginPage = () => {
   return (
     <div
       className="relative min-h-screen bg-center bg-cover text-white"
-      style={{ backgroundImage: "url('../../public/models/mapimage.png')" }}
+      style={{ backgroundImage: "url('/models/mapimage2.jpg')" }}
     >
       <div className="absolute inset-0 bg-black bg-opacity-40"></div>
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="text-4xl font-bold mb-8">MapChat</div>
+        <div className="text-4xl font-bold mb-8 text-yellow-400">MapChat</div>
         <div className="bg-gray-800 bg-opacity-70 rounded-lg shadow-md p-8 w-full max-w-md">
-          <h2 className="text-xl font-semibold mb-6 text-center">Login</h2>
+          <h2 className="text-xl font-semibold mb-6 text-center text-yellow-400">Login</h2>
           <form onSubmit={handleLogin}>
             {errorMessage && (
               <div className="mb-4 text-red-500 text-sm">{errorMessage}</div>
