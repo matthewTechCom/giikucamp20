@@ -23,21 +23,19 @@ export const getCsrfToken = async (): Promise<string> => {
 
 // ✅ サインアップ処理
 export const signUp = async (
-  email: string,
-  password: string,
   username: string,
+  password: string,
   userIcon: File | null
 ): Promise<void> => {
   try {
     const csrfToken = await getCsrfToken();
 
     const formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
     formData.append("username", username);
+    formData.append("password", password);
 
     if (userIcon) {
-      formData.append("usericon", userIcon);
+      formData.append("file", userIcon);
     }
 
     const response = await fetch(`${API_URL}/signup`, {
@@ -46,7 +44,7 @@ export const signUp = async (
         "X-CSRF-Token": csrfToken,
       },
       body: formData,
-      credentials: "include", // Cookieを送信
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -63,15 +61,16 @@ export const signUp = async (
   }
 };
 
-// ユーザー情報の型定義
+// ✅ ユーザー情報の型定義
 export interface UserResponse {
   id: number;
   username: string;
-  userIcon?: string; // ユーザーアイコンが必須でない場合
+  userIcon: string; // 常に string を期待
 }
 
+// ✅ ログイン処理
 export const logIn = async (
-  email: string,
+  username: string,
   password: string
 ): Promise<UserResponse> => {
   try {
@@ -84,8 +83,8 @@ export const logIn = async (
         "Content-Type": "application/json",
         "X-CSRF-Token": csrfToken,
       },
-      body: JSON.stringify({ email, password }),
-      credentials: "include", // Cookieを送信
+      body: JSON.stringify({ username, password }),
+      credentials: "include",
     });
 
     if (!loginResponse.ok) {
@@ -98,7 +97,7 @@ export const logIn = async (
     // ユーザー情報取得リクエスト
     const userResponse = await fetch(`${API_URL}/me`, {
       method: "GET",
-      credentials: "include", // Cookieも送信
+      credentials: "include",
     });
 
     if (!userResponse.ok) {
@@ -106,10 +105,31 @@ export const logIn = async (
     }
 
     const userData: UserResponse = await userResponse.json();
+
     console.log("ログイン成功:", userData);
     return userData;
   } catch (error) {
     console.error("ログインエラー:", error);
+    throw error;
+  }
+};
+
+// ✅ 現在ログイン中のユーザー情報を取得
+export const fetchUser = async (): Promise<UserResponse> => {
+  try {
+    const response = await fetch(`${API_URL}/me`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`ユーザー情報取得エラー: ${response.statusText}`);
+    }
+
+    const userData: UserResponse = await response.json();
+    return userData;
+  } catch (error) {
+    console.error("ユーザー情報取得エラー:", error);
     throw error;
   }
 };
