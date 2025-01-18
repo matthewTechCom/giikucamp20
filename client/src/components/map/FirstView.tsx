@@ -30,9 +30,9 @@ export const FirstView = () => {
             className="fixed inset-0 bg-slate-800 bg-opacity-80"
             onClick={closeModal}
         ></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50  " >
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 iphone:w-full iphone:h-full" >
             {currentStep === 1 && (
-                <div className="bg-gray-800 text-slate-100 min-w-56 bg-opacity-90 px-11 py-72 rounded-md">
+                <div className="bg-gray-800 text-slate-100 w-full h-full bg-opacity-90 px-10 py-80 iphone:py-40">
                     <div className="flex flex-col gap-4 mb-8">
                     <h1 className="font-bold text-4xl ">MapChat</h1>
                     <p>誰でも簡単に、<br/>近くの人と情報をシェア</p>

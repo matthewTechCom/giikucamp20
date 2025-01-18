@@ -12,6 +12,9 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      screens: {
+        'iphone': {'max': '450px'}, // iPhoneのPro Maxのサイズ以下
+      },
     },
   },
   plugins: [],
