@@ -62,7 +62,7 @@ func main() {
 
 	// ルーム関連の初期化
 	roomRepository := repository.NewRoomRepository(db) // db を渡す
-	roomUsecase := usecase.NewRoomUsecase(roomRepository)
+	roomUsecase := usecase.NewRoomUsecase(roomRepository, s3Repository)
 	roomController := controller.NewRoomController(roomUsecase)
 
 	// ルーターの設定
