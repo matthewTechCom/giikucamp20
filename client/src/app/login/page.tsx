@@ -8,20 +8,19 @@ import { logIn } from "../../utils/apiUtils";
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // エラーメッセージ用
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { setUser } = useContext(UserContext);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(null); // エラーをリセット
+    setErrorMessage(null);
     try {
-      // ✅ ログイン処理
       const user = await logIn(username, password);
       setUser({
         id: user.id,
         username: user.username,
-        userIcon: user.userIcon,
+        userIcon: user.userIcon || null, // undefined の場合は null を設定
       });
 
       alert("ログイン成功！");
@@ -29,7 +28,6 @@ const LoginPage = () => {
     } catch (error) {
       console.error("ログインエラー:", error);
 
-      // エラーメッセージを設定
       if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
@@ -46,7 +44,13 @@ const LoginPage = () => {
       >
         <h1 className="text-2xl font-bold mb-6">ログイン</h1>
         {errorMessage && (
-          <div className="mb-4 text-red-500 text-sm">{errorMessage}</div>
+          <div
+            className="mb-4 text-red-500 text-sm"
+            role="alert"
+            aria-live="assertive"
+          >
+            {errorMessage}
+          </div>
         )}
         <input
           type="text"
@@ -54,6 +58,8 @@ const LoginPage = () => {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           className="mb-4 p-2 w-full border rounded"
+          aria-label="ユーザー名"
+          required
         />
         <input
           type="password"
@@ -61,10 +67,13 @@ const LoginPage = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="mb-4 p-2 w-full border rounded"
+          aria-label="パスワード"
+          required
         />
         <button
           type="submit"
           className="bg-blue-500 text-white py-2 px-4 rounded w-full"
+          aria-label="ログインボタン"
         >
           ログイン
         </button>

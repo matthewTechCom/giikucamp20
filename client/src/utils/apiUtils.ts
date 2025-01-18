@@ -25,7 +25,7 @@ export const getCsrfToken = async (): Promise<string> => {
 export const signUp = async (
   username: string,
   password: string,
-  userIcon: File | null
+  userIcon: File | null // 修正: 型を File | null に変更
 ): Promise<void> => {
   try {
     const csrfToken = await getCsrfToken();
@@ -35,7 +35,7 @@ export const signUp = async (
     formData.append("password", password);
 
     if (userIcon) {
-      formData.append("usericon", userIcon);
+      formData.append("file", userIcon); // バックエンドが期待するキー名
     }
 
     const response = await fetch(`${API_URL}/signup`, {
@@ -44,7 +44,7 @@ export const signUp = async (
         "X-CSRF-Token": csrfToken,
       },
       body: formData,
-      credentials: "include", // Cookieを送信
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -61,13 +61,14 @@ export const signUp = async (
   }
 };
 
-// ユーザー情報の型定義
+// ✅ ユーザー情報の型定義
 export interface UserResponse {
   id: number;
   username: string;
-  userIcon?: string; // ユーザーアイコンが必須でない場合
+  userIcon: string; // 修正: 常に string を期待
 }
 
+// ✅ ログイン処理
 export const logIn = async (
   username: string,
   password: string
@@ -83,7 +84,7 @@ export const logIn = async (
         "X-CSRF-Token": csrfToken,
       },
       body: JSON.stringify({ username, password }),
-      credentials: "include", // Cookieを送信
+      credentials: "include",
     });
 
     if (!loginResponse.ok) {
@@ -96,7 +97,7 @@ export const logIn = async (
     // ユーザー情報取得リクエスト
     const userResponse = await fetch(`${API_URL}/me`, {
       method: "GET",
-      credentials: "include", // Cookieも送信
+      credentials: "include",
     });
 
     if (!userResponse.ok) {
@@ -104,6 +105,7 @@ export const logIn = async (
     }
 
     const userData: UserResponse = await userResponse.json();
+
     console.log("ログイン成功:", userData);
     return userData;
   } catch (error) {

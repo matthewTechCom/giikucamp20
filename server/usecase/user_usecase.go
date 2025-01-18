@@ -4,6 +4,7 @@ import (
 	"chat_upgrade/model"
 	"chat_upgrade/repository"
 	"chat_upgrade/validator"
+	"mime/multipart"
 	"os"
 	"time"
 
@@ -16,17 +17,23 @@ type IUserUsecase interface {
     Login(user model.User) (string, error)
     UpdateUserIcon(userID uint, userIcon string) error
     GetUserByID(userID uint) (model.User, error)
+    UploadUserIcon(file *multipart.FileHeader) (string, error)
 }
 
 type userUsecase struct {
     ur repository.IUserRepository
     uv validator.IUserValidator
+    s3 repository.IS3Repository
 }
 
-func NewUserUsecase(ur repository.IUserRepository, uv validator.IUserValidator) IUserUsecase {
-    return &userUsecase{ur, uv}
+func NewUserUsecase(ur repository.IUserRepository, uv validator.IUserValidator, s3 repository.IS3Repository) IUserUsecase {
+    return &userUsecase{ur, uv, s3}
 }
 
+func (uu *userUsecase) UploadUserIcon(file *multipart.FileHeader) (string, error) {
+	// S3リポジトリを使って写真をアップロード
+	return uu.s3.UploadFile(file)
+}
 func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
     if err := uu.uv.UserValidate(user); err != nil {
         return model.UserResponse{}, err
@@ -45,7 +52,7 @@ func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
     if err := uu.ur.CreateUser(&newUser); err != nil {
         return model.UserResponse{}, err
     }
-
+    
     resUser := model.UserResponse{
         ID:       newUser.ID,
         Username: newUser.Username,

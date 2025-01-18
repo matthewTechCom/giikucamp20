@@ -43,9 +43,10 @@ func main() {
 
 	// リポジトリの初期化
 	userRepository := repository.NewUserRepository(db)
+	s3Repository := repository.NewS3Repository(config.S3Bucket) 
 
 	// ユースケースの初期化
-	userUsecase := usecase.NewUserUsecase(userRepository, userValidator)
+	userUsecase := usecase.NewUserUsecase(userRepository, userValidator, s3Repository)
 
 	// コントローラーの初期化
 	userController := controller.NewUserController(userUsecase)

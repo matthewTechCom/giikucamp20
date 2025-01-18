@@ -2,14 +2,14 @@
 export interface AuthResponse {
   id: number;
   username: string;
-  userIcon?: string; // サーバーが返すフィールド名に合わせる
+  userIcon: string; // サーバーが返すフィールド名に合わせる
 }
 
 // ✅ ユーザー情報のレスポンス型を修正
 export interface UserResponse {
   id: number;
   username: string;
-  userIcon?: string; // フィールド名を統一
+  userIcon: string; // フィールド名を統一
 }
 
 // CSRFトークンのレスポンス型
@@ -25,47 +25,47 @@ export interface AuthResponse {
 // チャットメッセージの型定義
 export type ChatMessage =
   | {
-      type: 'JOIN'
-      username: string
+      type: "JOIN";
+      username: string;
       /**
        * userIcon を必ず送らないケースがあるならオプションにする
        * （サーバーで必ず送ってくるなら string でOK）
        */
-      userIcon?: string 
-      text?: string
+      userIcon?: string;
+      text?: string;
     }
   | {
-      type: 'LEAVE'
-      username: string
-      userIcon?: string
-      text?: string
+      type: "LEAVE";
+      username: string;
+      userIcon?: string;
+      text?: string;
     }
   | {
-      type: 'MSG'
-      username: string
-      userIcon?: string
-      text: string
+      type: "MSG";
+      username: string;
+      userIcon?: string;
+      text: string;
     }
   | {
-      type: 'FILE'
-      username: string
-      userIcon?: string
-      fileUrl: string
-      fileName: string
+      type: "FILE";
+      username: string;
+      userIcon?: string;
+      fileUrl: string;
+      fileName: string;
     }
   | {
-      type: 'ERROR'
-      message: string
+      type: "ERROR";
+      message: string;
     }
   | {
-      type: 'SYSTEM'
-      text: string
+      type: "SYSTEM";
+      text: string;
     }
   | {
-      type: 'SET_USER'
-      username: string
-      userIcon?: string
-    }
+      type: "SET_USER";
+      username: string;
+      userIcon?: string;
+    };
 
 // 型ガード関数の定義
 export function isJoinMessage(msg: ChatMessage): msg is {
