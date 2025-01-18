@@ -60,22 +60,22 @@ export const FirstView = () => {
                 </div>
             )}
             {currentStep === 2 && (
-                <div className="bg-gray-800 text-slate-100 min-w-56 bg-opacity-90 px-11  py-72 rounded-md">
+                <div className="bg-gray-800 text-slate-100 min-w-56 bg-opacity-90 px-11 py-52 rounded-md">
                     <div className="flex flex-col gap-4 mb-4">
                     <h1 className="font-bold text-4xl m-1">MapChat</h1>
                     </div>
                     <div className="bg-gray-500 bg-opacity-40 rounded-lg">
-                        <div className="">
+                        <div className="text-center">
                             <p className="text-center text-xl p-3 font-bold">ルームの作成</p>
-                            <div className="m-14">
+                            <div className="flex flex-col gap-4 m-5">
                                 <p>ルーム名</p>
-                                <input type="text"/>
+                                <input type="text" className="rounded-md bg-gray-300"/>
                                 <p>ルームアイコン</p>
                                 <input type="file"/>
                                 <p>ルームの説明</p>
-                                <input type="text"/>
+                                <input type="text" className="rounded-md bg-gray-300"/>
                                 <p>ルームパスワード</p>
-                                <input type="text"/>
+                                <input type="text" className="rounded-md bg-gray-300"/>
                             </div>
                             <div className="flex gap-5 items-center justify-center pb-4">
                                 <button className="bg-yellow-300 rounded-lg text-black p-2" onClick={() => backStep()}>← 戻る</button>
