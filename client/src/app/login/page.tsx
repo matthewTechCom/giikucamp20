@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import { logIn } from "../../utils/apiUtils";
+import { SiGooglemaps } from "react-icons/si";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -45,7 +46,10 @@ const LoginPage = () => {
     >
       <div className="absolute inset-0 bg-black bg-opacity-40"></div>
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="text-4xl font-bold mb-8 text-yellow-400">MapChat</div>
+      <div className="flex items-center text-4xl font-bold mb-8">
+          <SiGooglemaps className="text-[#DB4437] mr-2" />
+          <span className="text-yellow-400">MapChat</span>
+        </div>
         <div className="bg-gray-800 bg-opacity-70 rounded-lg shadow-md p-8 w-full max-w-md">
           <h2 className="text-xl font-semibold mb-6 text-center text-yellow-400">Login</h2>
           <form onSubmit={handleLogin}>
@@ -59,7 +63,7 @@ const LoginPage = () => {
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mb-4 p-2 w-full border rounded"
+                className="mb-4 p-2 w-full border rounded text-black"
               />
             </label>
 
@@ -70,7 +74,7 @@ const LoginPage = () => {
                 placeholder="パスワード"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mb-4 p-2 w-full border rounded"
+                className="mb-4 p-2 w-full border rounded text-black"
               />
             </label>
 

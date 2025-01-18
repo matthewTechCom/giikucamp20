@@ -11,6 +11,7 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        goole: "#DB4437"
       },
       screens: {
         'iphone': {'max': '450px'}, // iPhoneのPro Maxのサイズ以下
