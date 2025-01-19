@@ -1,9 +1,14 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/UserContext";
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import {
+  GoogleMap,
+  Marker,
+  useLoadScript,
+  OverlayView,
+} from "@react-google-maps/api";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
@@ -26,7 +31,7 @@ export default function SearchRoomPage() {
 
   const { isLoaded, loadError } = useLoadScript({ googleMapsApiKey });
 
-  // Fetch all rooms from the server
+  // 部屋リストを取得
   useEffect(() => {
     async function loadRooms() {
       try {
@@ -40,7 +45,7 @@ export default function SearchRoomPage() {
         const data = await res.json();
         console.log("Raw data from server:", data);
 
-        // Convert server’s `latitude` / `longitude` to roomLatitude / roomLongitude
+        // APIからのlatitude/longitude文字列を数値型へ変換
         const numericData = data.map((room: any) => {
           const lat = parseFloat(room.latitude);
           const lng = parseFloat(room.longitude);
@@ -60,7 +65,6 @@ export default function SearchRoomPage() {
           };
         });
 
-        console.log("Converted numericData:", numericData);
         setRooms(numericData);
       } catch (err) {
         if (err instanceof Error) {
@@ -76,12 +80,12 @@ export default function SearchRoomPage() {
     loadRooms();
   }, []);
 
-  // Log whenever rooms state updates
+  // rooms 更新時にログを出す
   useEffect(() => {
     console.log("rooms state updated:", rooms);
   }, [rooms]);
 
-  // Example map center (Tokyo near Akihabara)
+  // 地図の中心座標（例：秋葉原付近）
   const center = { lat: 35.69575, lng: 139.77521 };
 
   if (!user) {
@@ -103,6 +107,9 @@ export default function SearchRoomPage() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
+  // 丸いアイコンの大きさ
+  const circleSize = 30;
+
   return (
     <div className="relative w-screen h-screen">
       {/* 地図（最背面） */}
@@ -112,30 +119,76 @@ export default function SearchRoomPage() {
           center={center}
           zoom={17}
         >
-          {/* Render Markers */}
-          {rooms.map((roomInfo, index) => (
-            <Marker
-              key={index}
-              position={{
-                lat: roomInfo.roomLatitude,
-                lng: roomInfo.roomLongitude,
-              }}
-              icon={{
-                url: roomInfo.roomImage,
-                scaledSize: new google.maps.Size(35, 35),
-              }}
-              onClick={() =>
-                router.push(
-                  `/chat?room=${encodeURIComponent(
-                    roomInfo.roomName.trim()
-                  )}&password=${encodeURIComponent(roomInfo.password.trim())}`
-                )
-              }
-            />
+          {rooms.map((roomInfo) => (
+            <React.Fragment key={`room-${roomInfo.id}`}>
+              {/* デフォルトのピン（Marker） */}
+              <Marker
+                position={{
+                  lat: roomInfo.roomLatitude,
+                  lng: roomInfo.roomLongitude,
+                }}
+                onClick={() =>
+                  router.push(
+                    `/chat?room=${encodeURIComponent(
+                      roomInfo.roomName.trim()
+                    )}&password=${encodeURIComponent(roomInfo.password.trim())}`
+                  )
+                }
+              />
+
+              {/* ピンの上部に丸い画像を重ねる OverlayView */}
+              <OverlayView
+                position={{
+                  lat: roomInfo.roomLatitude,
+                  lng: roomInfo.roomLongitude,
+                }}
+                // Markerと同じ座標に配置しつつ、上にずらす
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                getPixelPositionOffset={() => ({
+                  // xは円の中心をピンの中心に合わせる
+                  x: -(circleSize / 2),
+                  // yは丸いアイコンの高さ分 + 余裕(20px)で上へ
+                  y: -(circleSize + 10),
+                })}
+              >
+                <div
+                  onClick={() =>
+                    router.push(
+                      `/chat?room=${encodeURIComponent(
+                        roomInfo.roomName.trim()
+                      )}&password=${encodeURIComponent(
+                        roomInfo.password.trim()
+                      )}`
+                    )
+                  }
+                  style={{
+                    width: circleSize,
+                    height: circleSize,
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    // 枠線が必要な場合:
+                    // border: "2px solid white",
+                    zIndex: 9999,
+                  }}
+                >
+                  <img
+                    src={roomInfo.roomImage}
+                    alt="room icon"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                </div>
+              </OverlayView>
+            </React.Fragment>
           ))}
         </GoogleMap>
       </div>
 
+      {/* ヘッダー */}
       <header className="relative z-10 bg-black bg-opacity-80 p-4 text-white flex justify-between items-center">
         <h2 className="text-xl font-bold">ルームを検索する</h2>
         <button
@@ -146,8 +199,10 @@ export default function SearchRoomPage() {
         </button>
       </header>
 
+      {/* メイン（クリック操作を地図に通したい場合はpointer-events-none） */}
       <main className="relative z-10 flex-1 pointer-events-none" />
 
+      {/* フッター */}
       <footer className="pointer-events-none absolute bottom-0 w-full z-10">
         <div className="p-4 flex justify-center shadow-lg">
           <button
