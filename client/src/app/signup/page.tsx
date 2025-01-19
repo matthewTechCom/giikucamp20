@@ -67,7 +67,11 @@ const SignUpPage = () => {
       <div className="text-center mb-12">
         <h1
           className="text-6xl font-extrabold mb-6 text-white drop-shadow-lg"
-          style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
+          style={{
+            fontFamily: '"Comic Sans MS", "Comic Sans", cursive',
+            cursor: "pointer",
+          }}
+          onClick={() => router.push("/")}
         >
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
             MapChat
@@ -132,14 +136,15 @@ const SignUpPage = () => {
               />
               {/* ③ 選択された画像があれば丸くプレビュー表示 */}
               {previewUrl && (
-                <div className="mt-4 w-32 h-32 rounded-full overflow-hidden">
-                  <img
-                    src={previewUrl}
-                    alt="ユーザーアイコンプレビュー"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
+              <div className="mt-4 w-32 h-32 rounded-full relative overflow-hidden">
+                 <Image
+                 src={previewUrl}
+                 alt="ユーザーアイコンプレビュー"
+                 fill
+                 className="object-cover"
+                 />
+               </div>
+            )}
             </div>
           </div>
           <button
