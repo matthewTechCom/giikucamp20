@@ -120,6 +120,10 @@ export default function SearchRoomPage() {
                 lat: roomInfo.roomLatitude,
                 lng: roomInfo.roomLongitude,
               }}
+              icon={{
+                url: roomInfo.roomImage,
+                scaledSize: new google.maps.Size(35, 35),
+              }}
               onClick={() =>
                 router.push(
                   `/chat?room=${encodeURIComponent(
