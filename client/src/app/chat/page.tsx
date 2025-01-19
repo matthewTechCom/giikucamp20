@@ -1,6 +1,7 @@
 // src/pages/Chat.tsx
 "use client";
 
+import { getCsrfToken } from "@/utils/apiUtils";
 import axios from "axios";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
@@ -238,10 +239,17 @@ const Chat: React.FC = () => {
       try {
         const formData = new FormData();
         formData.append("file", selectedFile);
-
+        console.log(selectedFile);
+        const csrfToken = await getCsrfToken();
         const response = await axios.post<UploadResponse>(
           "http://localhost:8080/upload",
-          formData
+          formData,
+          {
+            withCredentials: true,
+            headers: {
+              "X-CSRF-Token": csrfToken, // CSRFトークンをヘッダーに追加
+            },
+          }
         );
         const fileUrl = response.data.url;
 
@@ -276,15 +284,31 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-200">
+    <div
+      className="
+        flex flex-col 
+        h-screen 
+        bg-gradient-to-b 
+        from-green-100 
+        via-blue-100 
+        to-blue-200
+      "
+    >
       {/* Header */}
-      <div className="bg-gray-800 text-white py-3 px-6 flex items-center">
-        <span className="text-xl font-bold">{roomName}</span>
+      <div className="flex items-center justify-between bg-white/80 py-2 px-4 shadow">
+        <h1
+          className="text-3xl font-extrabold text-white mb-2"
+          style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
+        >
+          <span className="inline-block animate-pulse delay-1000 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+            {roomName}
+          </span>
+        </h1>
         <button
           onClick={handleLeave}
-          className="ml-auto bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
+          className="ml-auto hover:bg-red-600 px-3 py-1 rounded"
         >
-          <TbLogout2 size={25} />
+          <TbLogout2 size={25} className="text-blue-400" />
         </button>
       </div>
 
@@ -315,7 +339,7 @@ const Chat: React.FC = () => {
       <div className="bg-white border-t border-gray-300 p-3">
         <div className="flex items-center">
           <label htmlFor="file-input" className="mr-2 cursor-pointer">
-            <FaFileImport className="text-2xl text-gray-600 hover:text-gray-800" />
+            <FaFileImport className="text-2xl text-blue-500 hover:text-gray-800" />
           </label>
           <input
             id="file-input"
@@ -341,7 +365,7 @@ const Chat: React.FC = () => {
             />
             <button
               onClick={handleSend}
-              className="bg-blue-500 text-white px-4 py-2 rounded-r hover:bg-blue-600"
+              className="bg-blue-400 text-white px-4 py-2 rounded-r hover:bg-blue-600"
             >
               <IoIosSend size={25} />
             </button>
