@@ -50,7 +50,7 @@ func NewRouter(
 	// ルーム関連のエンドポイント
 	e.POST("/registerRoom", rc.RegisterRoom)
 	e.GET("/rooms", rc.GetAllRooms) // フロントに全データを返すルート
-	e.POST("/rooms/:roomID/uploadImage", rc.UpdateRoomImage)
+	// e.POST("/rooms/:roomID/uploadImage", rc.UpdateRoomImage)
 
 	// WebSocket 接続用（チャット用）
 	e.GET("/rooms/:id/ws", hc.ServerWs)

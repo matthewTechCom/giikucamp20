@@ -13,11 +13,12 @@ import (
 
 // 部屋登録に関するビジネスロジックのインターフェース
 type IRoomUsecase interface {
-	RegisterRoom(roomName, password, description, latitudeStr, longitudeStr string) (*model.Room, error)
+	RegisterRoom(roomName, roomIconURL, password, description, latitudeStr, longitudeStr string) (*model.Room, error)
 	// GetRoomByName(roomName string) (*model.Room, error)
 	DeleteOldRooms() error
 	GetAllRooms() ([]model.Room, error)
-	UpdateRoomImage(roomID uint, file *multipart.FileHeader) error
+	// UpdateRoomImage(roomID uint, file *multipart.FileHeader) error
+	UploadRoomIcon(file *multipart.FileHeader) (string, error)
 }
 
 // すべての部屋情報を返すメソッド
@@ -27,36 +28,36 @@ func (ru *roomUsecase) GetAllRooms() ([]model.Room, error) {
 
 // IRoomUsecase の実装構造体
 type roomUsecase struct {
-	rr  repository.IRoomRepository
-	s3r repository.IS3Repository
+	rr repository.IRoomRepository
+	s3 repository.IS3Repository
 }
 
 // roomUsecase のインスタンスを生成する
-func NewRoomUsecase(rr repository.IRoomRepository, s3r repository.IS3Repository) IRoomUsecase {
+func NewRoomUsecase(rr repository.IRoomRepository, s3 repository.IS3Repository) IRoomUsecase {
 	return &roomUsecase{
-		rr:  rr,
-		s3r: s3r,
+		rr: rr,
+		s3: s3,
 	}
 }
 
 // 部屋画像をアップロードして更新するメソッド
-func (ru *roomUsecase) UpdateRoomImage(roomID uint, file *multipart.FileHeader) error {
-	// S3にアップロード
-	imageURL, err := ru.s3r.UploadFile(file)
-	if err != nil {
-		return err
-	}
+// func (ru *roomUsecase) UpdateRoomImage(roomID uint, file *multipart.FileHeader) error {
+// 	// S3にアップロード
+// 	imageURL, err := ru.s3r.UploadFile(file)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// データベースにURLを格納
-	if err := ru.rr.UpdateRoomImage(roomID, imageURL); err != nil {
-		return err
-	}
+// 	// データベースにURLを格納
+// 	if err := ru.rr.UpdateRoomImage(roomID, imageURL); err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // フォームなどから受け取った情報で部屋を登録するメソッド
-func (ru *roomUsecase) RegisterRoom(roomName, password, description, latitudeStr, longitudeStr string) (*model.Room, error) {
+func (ru *roomUsecase) RegisterRoom(roomName, roomIconURL, password, description, latitudeStr, longitudeStr string) (*model.Room, error) {
 	// 既存の部屋が存在しないかチェック
 	// if _, found := ru.rr.GetRoomByName(roomName); found {
 	// 	return nil, fmt.Errorf("room already exists: %s", roomName)
@@ -75,6 +76,7 @@ func (ru *roomUsecase) RegisterRoom(roomName, password, description, latitudeStr
 
 	room := &model.Room{
 		RoomName:    roomName,
+		RoomImage:   roomIconURL,
 		Password:    password,
 		Description: description,
 		Latitude:    lat,
@@ -101,4 +103,8 @@ func (ru *roomUsecase) RegisterRoom(roomName, password, description, latitudeStr
 // 実装に削除メソッドを追加
 func (ru *roomUsecase) DeleteOldRooms() error {
 	return ru.rr.DeleteOldRooms()
+}
+
+func (ru *roomUsecase) UploadRoomIcon(file *multipart.FileHeader) (string, error) {
+	return ru.s3.UploadFile(file)
 }

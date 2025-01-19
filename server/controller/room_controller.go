@@ -3,7 +3,6 @@ package controller
 import (
 	"chat_upgrade/usecase"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -13,7 +12,7 @@ type IRoomController interface {
 	RegisterRoom(c echo.Context) error
 	// GetRoomByName(c echo.Context) error
 	GetAllRooms(c echo.Context) error
-	UpdateRoomImage(c echo.Context) error
+	// UpdateRoomImage(c echo.Context) error
 }
 
 type roomController struct {
@@ -28,26 +27,26 @@ func NewRoomController(ru usecase.IRoomUsecase) IRoomController {
 }
 
 // 部屋画像をアップロードして更新するエンドポイント
-func (rc *roomController) UpdateRoomImage(c echo.Context) error {
-	roomID := c.Param("roomID")
-	file, err := c.FormFile("file")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ファイルが見つかりません"})
-	}
+// func (rc *roomController) UpdateRoomImage(c echo.Context) error {
+// 	roomID := c.Param("roomID")
+// 	file, err := c.FormFile("file")
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ファイルが見つかりません"})
+// 	}
 
-	// roomIDを数値に変換
-	id, err := strconv.Atoi(roomID)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "無効なroomIDです"})
-	}
+// 	// roomIDを数値に変換
+// 	id, err := strconv.Atoi(roomID)
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "無効なroomIDです"})
+// 	}
 
-	// 画像をアップロードして更新
-	if err := rc.ru.UpdateRoomImage(uint(id), file); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	}
+// 	// 画像をアップロードして更新
+// 	if err := rc.ru.UpdateRoomImage(uint(id), file); err != nil {
+// 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+// 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "画像を更新しました"})
-}
+// 	return c.JSON(http.StatusOK, map[string]string{"message": "画像を更新しました"})
+// }
 
 // すべての部屋データを取得するハンドラ
 func (rc *roomController) GetAllRooms(c echo.Context) error {
@@ -68,13 +67,19 @@ func (rc *roomController) RegisterRoom(c echo.Context) error {
 	description := c.FormValue("description")
 	latitudeStr := c.FormValue("latitude")
 	longitudeStr := c.FormValue("longitude")
+	file, err := c.FormFile("file")
 
 	// 必須項目チェック
 	if roomName == "" || password == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "roomName と password は必須です"})
 	}
 
-	room, err := rc.ru.RegisterRoom(roomName, password, description, latitudeStr, longitudeStr)
+	roomIconURL, err := rc.ru.UploadRoomIcon(file)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, "写真のアップロードに失敗しました")
+	}
+
+	room, err := rc.ru.RegisterRoom(roomName, roomIconURL, password, description, latitudeStr, longitudeStr)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "ルーム登録エラー: " + err.Error()})
 	}
