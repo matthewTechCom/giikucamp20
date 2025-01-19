@@ -2,16 +2,31 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signUp } from "../../utils/apiUtils";
 
 const SignUpPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [userIcon, setUserIcon] = useState<File | null>(null);
+  // ① プレビュー用URLの状態を用意
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
+
+  // ② userIcon が変わったら、プレビューURLを生成
+  useEffect(() => {
+    if (userIcon) {
+      const url = URL.createObjectURL(userIcon);
+      setPreviewUrl(url);
+      // クリーンアップでメモリリークを防ぐ
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPreviewUrl("");
+    }
+  }, [userIcon]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +39,7 @@ const SignUpPage = () => {
       setUsername("");
       setPassword("");
       setUserIcon(null);
+      setPreviewUrl("");
       router.push("/login");
     } catch (error) {
       console.error("SignUp Error:", error);
@@ -47,8 +63,8 @@ const SignUpPage = () => {
           style={{ objectFit: "cover" }}
         />
       </div>
+
       <div className="text-center mb-12">
-        {/* タイトル */}
         <h1
           className="text-6xl font-extrabold mb-6 text-white drop-shadow-lg"
           style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
@@ -114,6 +130,16 @@ const SignUpPage = () => {
                 className="text-gray-200"
                 accept="image/*"
               />
+              {/* ③ 選択された画像があれば丸くプレビュー表示 */}
+              {previewUrl && (
+                <div className="mt-4 w-32 h-32 rounded-full overflow-hidden">
+                  <img
+                    src={previewUrl}
+                    alt="ユーザーアイコンプレビュー"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
             </div>
           </div>
           <button

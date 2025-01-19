@@ -12,7 +12,7 @@ const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
 export default function CreateRoomPage() {
   const router = useRouter();
-  
+
   // const { roomInfo, setRoomInfo } = useMapTransactionContext();
   const { user, setUser } = useContext(UserContext);
 
@@ -21,6 +21,9 @@ export default function CreateRoomPage() {
   const [roomDesc, setRoomDesc] = useState("");
   const [roomPass, setRoomPass] = useState("");
   const [roomIcon, setRoomIcon] = useState<File | null>(null);
+
+  // ★ ①プレビューURL管理用のステートを追加
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   // クリック位置（マップ上でルーム作成位置を指定）
   const [clickLocation, setClickLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -31,6 +34,19 @@ export default function CreateRoomPage() {
   });
 
   const { isLoaded, loadError } = useLoadScript({ googleMapsApiKey });
+
+  // ★ ② roomIconが変わるたびにプレビューURLを生成・破棄
+  useEffect(() => {
+    if (roomIcon) {
+      const url = URL.createObjectURL(roomIcon);
+      setPreviewUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setPreviewUrl("");
+    }
+  }, [roomIcon]);
 
   // ユーザーの現在位置を取得して center を更新する
   useEffect(() => {
@@ -88,7 +104,6 @@ export default function CreateRoomPage() {
   };
 
   const handleSubmit = async () => {
-    // クリック位置（もしくはルーム位置）が設定されていなければ警告
     if (!clickLocation) {
       alert("マップ上でルームの場所を選択してください");
       return;
@@ -178,6 +193,16 @@ export default function CreateRoomPage() {
             accept="image/*"
             onChange={(e) => setRoomIcon(e.target.files ? e.target.files[0] : null)}
           />
+          {/* ★ ③ 画像が選択された場合、プレビューを丸く表示 */}
+          {previewUrl && (
+            <div className="mt-4 w-32 h-32 rounded-full overflow-hidden">
+              <img
+                src={previewUrl}
+                alt="ルームアイコンプレビュー"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
         </div>
         <div className="mb-4">
           <label className="block mb-1 font-bold">ルームの説明</label>
