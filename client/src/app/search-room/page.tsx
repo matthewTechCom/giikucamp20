@@ -4,62 +4,85 @@ import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/UserContext";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
-import { RoomDetail } from "@/components/map/RoomDetail";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
 interface RoomInfoState {
-  roomName: string,
-  roomIcon: string,
-  roomDetail: string,
-  roomPassword: string,
-  roomLongitude: number ,
-  roomLatitude: number ,
+  id: number;
+  roomName: string;
+  roomImage: string;
+  password: string;
+  description: string;
+  roomLatitude: number;
+  roomLongitude: number;
 }
 
 export default function SearchRoomPage() {
-  const [rooms, setRooms] = useState<RoomInfoState[]>([]); 
-  const [loading, setLoading] = useState(true); 
+  const [rooms, setRooms] = useState<RoomInfoState[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dummyRoomInfo, setDummyRoomInfo] = useState([
-    {roomName: "テスト4", roomIcon: File, roomDetail: "あかさたな", roomPassword: "kishi1021", roomLongitude: 139.7768944, roomLatitude: 35.6964538},
-    {roomName: "テスト5", roomIcon: File, roomDetail: "あかさたな", roomPassword: "kishi1021", roomLongitude: 139.7668944, roomLatitude: 35.6964538},
-    {roomName: "テスト6", roomIcon: File, roomDetail: "あかさたな", roomPassword: "kishi1021", roomLongitude: 139.7568944, roomLatitude: 35.6964538}
-  ]);
   const router = useRouter();
   const { user } = useContext(UserContext);
 
   const { isLoaded, loadError } = useLoadScript({ googleMapsApiKey });
 
-  // 全てのroom情報の取得
+  // Fetch all rooms from the server
   useEffect(() => {
     async function loadRooms() {
       try {
-        const res = await fetch('http://localhost:8080/rooms');
-        console.log(res);
-        if (!res.ok) throw new Error('Failed to fetch rooms');
+        const res = await fetch("http://localhost:8080/rooms");
+        console.log("Fetch /rooms response:", res);
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch rooms");
+        }
+
         const data = await res.json();
-        setRooms(data);
-        console.log(rooms);
+        console.log("Raw data from server:", data);
+
+        // Convert server’s `latitude` / `longitude` to roomLatitude / roomLongitude
+        const numericData = data.map((room: any) => {
+          const lat = parseFloat(room.latitude);
+          const lng = parseFloat(room.longitude);
+
+          if (isNaN(lat) || isNaN(lng)) {
+            console.error("Invalid lat/lng encountered:", {
+              latitude: room.latitude,
+              longitude: room.longitude,
+              room,
+            });
+          }
+
+          return {
+            ...room,
+            roomLatitude: lat,
+            roomLongitude: lng,
+          };
+        });
+
+        console.log("Converted numericData:", numericData);
+        setRooms(numericData);
       } catch (err) {
-        // 型ガードでエラーの型を確認
         if (err instanceof Error) {
-          setError(err.message); // Errorオブジェクトからメッセージを取得
+          setError(err.message);
         } else {
-          setError('Unknown error occurred'); // 型が不明な場合のデフォルトメッセージ
+          setError("Unknown error occurred");
         }
       } finally {
         setLoading(false);
       }
     }
+
     loadRooms();
-  }, [setRooms]);
+  }, []);
 
-  // 地図の中心
+  // Log whenever rooms state updates
+  useEffect(() => {
+    console.log("rooms state updated:", rooms);
+  }, [rooms]);
+
+  // Example map center (Tokyo near Akihabara)
   const center = { lat: 35.69575, lng: 139.77521 };
-
-  // 例: 秋葉原の座標
-  const positionAkiba = { lat: 35.69732, lng: 139.7657 };
 
   if (!user) {
     return (
@@ -80,37 +103,32 @@ export default function SearchRoomPage() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  const handleEnterChat = () => {
-  }
-
-  const handleClickAkiba = () => {
-    // 例えば ルーム詳細ページ や チャット画面へ遷移する例
-    alert("秋葉原のルームに参加します！");
-
-  };
-
   return (
     <div className="relative w-screen h-screen">
-      {/* --- 地図（最背面） --- */}
+      {/* 地図（最背面） */}
       <div className="absolute inset-0 z-0 min-h-screen">
         <GoogleMap
           mapContainerStyle={{ width: "100%", height: "100%" }}
           center={center}
           zoom={17}
-        >         
-        {rooms.map((mapInfo, index) => {
-
-          return(
-            <Marker 
-            key={index} 
-            position={{lat: mapInfo.roomLatitude , lng: mapInfo.roomLongitude}}
-            onClick={() =>     
-              router.push(
-              `/chat?room=${encodeURIComponent(mapInfo.roomName.trim())}&password=${encodeURIComponent(mapInfo.roomPassword.trim())}`
-            )}
+        >
+          {/* Render Markers */}
+          {rooms.map((roomInfo, index) => (
+            <Marker
+              key={index}
+              position={{
+                lat: roomInfo.roomLatitude,
+                lng: roomInfo.roomLongitude,
+              }}
+              onClick={() =>
+                router.push(
+                  `/chat?room=${encodeURIComponent(
+                    roomInfo.roomName.trim()
+                  )}&password=${encodeURIComponent(roomInfo.password.trim())}`
+                )
+              }
             />
-          )
-        })}
+          ))}
         </GoogleMap>
       </div>
 
@@ -130,7 +148,7 @@ export default function SearchRoomPage() {
         <div className="p-4 flex justify-center shadow-lg">
           <button
             className="pointer-events-auto bg-yellow-300 text-black px-4 py-2 rounded-lg font-semibold"
-            onClick={handleClickAkiba}
+            onClick={() => router.push("/chat")}
           >
             このルームに参加する →
           </button>
