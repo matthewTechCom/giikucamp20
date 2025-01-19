@@ -1,17 +1,59 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/UserContext";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { RoomDetail } from "@/components/map/RoomDetail";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
+interface RoomInfoState {
+  roomName: string,
+  roomIcon: File | null,
+  roomDetail: string,
+  roomPassword: string,
+  roomLongitude: number | null,
+  roomLatitude: number | null,
+}
+
 export default function SearchRoomPage() {
+  const [rooms, setRooms] = useState([]); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState<string | null>(null);
+  const [dummyRoomInfo, setDummyRoomInfo] = useState([
+    {roomName: "テスト4", roomIcon: File, roomDetail: "あかさたな", roomPassword: "kishi1021", roomLongitude: 139.7768944, roomLatitude: 35.6964538},
+    {roomName: "テスト5", roomIcon: File, roomDetail: "あかさたな", roomPassword: "kishi1021", roomLongitude: 139.7668944, roomLatitude: 35.6964538},
+    {roomName: "テスト6", roomIcon: File, roomDetail: "あかさたな", roomPassword: "kishi1021", roomLongitude: 139.7568944, roomLatitude: 35.6964538}
+  ]);
   const router = useRouter();
   const { user } = useContext(UserContext);
 
   const { isLoaded, loadError } = useLoadScript({ googleMapsApiKey });
+
+  // 全てのroom情報の取得
+  useEffect(() => {
+    async function loadRooms() {
+      try {
+        const res = await fetch('http://localhost:8080/rooms');
+        console.log(res);
+        if (!res.ok) throw new Error('Failed to fetch rooms');
+        const data = await res.json();
+        setRooms(data);
+        console.log(rooms);
+      } catch (err) {
+        // 型ガードでエラーの型を確認
+        if (err instanceof Error) {
+          setError(err.message); // Errorオブジェクトからメッセージを取得
+        } else {
+          setError('Unknown error occurred'); // 型が不明な場合のデフォルトメッセージ
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadRooms();
+  }, [setRooms]);
 
   // 地図の中心
   const center = { lat: 35.69575, lng: 139.77521 };
@@ -35,10 +77,16 @@ export default function SearchRoomPage() {
     return <div>地図を読み込んでいます...</div>;
   }
 
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  const handleEnterChat = () => {
+  }
+
   const handleClickAkiba = () => {
     // 例えば ルーム詳細ページ や チャット画面へ遷移する例
     alert("秋葉原のルームに参加します！");
-    // router.push("/room/xxxx");
+
   };
 
   return (
@@ -50,7 +98,18 @@ export default function SearchRoomPage() {
           center={center}
           zoom={17}
         >
-          <Marker position={positionAkiba} />
+        {dummyRoomInfo.map((mapInfo) => {
+          return(
+            <Marker 
+            key={mapInfo.roomDetail} 
+            position={{lat: mapInfo.roomLatitude , lng: mapInfo.roomLongitude}}
+            onClick={() =>     
+              router.push(
+              `/chat?room=${encodeURIComponent(mapInfo.roomName.trim())}&password=${encodeURIComponent(mapInfo.roomPassword.trim())}`
+            )}
+            />
+          )
+        })}
         </GoogleMap>
       </div>
 
