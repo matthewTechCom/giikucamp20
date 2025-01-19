@@ -10,15 +10,15 @@ const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
 interface RoomInfoState {
   roomName: string,
-  roomIcon: File | null,
+  roomIcon: string,
   roomDetail: string,
   roomPassword: string,
-  roomLongitude: number | null,
-  roomLatitude: number | null,
+  roomLongitude: number ,
+  roomLatitude: number ,
 }
 
 export default function SearchRoomPage() {
-  const [rooms, setRooms] = useState([]); 
+  const [rooms, setRooms] = useState<RoomInfoState[]>([]); 
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState<string | null>(null);
   const [dummyRoomInfo, setDummyRoomInfo] = useState([
@@ -97,11 +97,12 @@ export default function SearchRoomPage() {
           mapContainerStyle={{ width: "100%", height: "100%" }}
           center={center}
           zoom={17}
-        >
-        {dummyRoomInfo.map((mapInfo) => {
+        >         
+        {rooms.map((mapInfo, index) => {
+
           return(
             <Marker 
-            key={mapInfo.roomDetail} 
+            key={index} 
             position={{lat: mapInfo.roomLatitude , lng: mapInfo.roomLongitude}}
             onClick={() =>     
               router.push(
