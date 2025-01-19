@@ -239,21 +239,14 @@ const Chat: React.FC = () => {
       try {
         const formData = new FormData();
         formData.append("file", selectedFile);
-<<<<<<< HEAD
 
         console.log(selectedFile);
 
-=======
-        console.log(selectedFile);
->>>>>>> fa1325591d01322c831701f3f164919d176faa8d
         const csrfToken = await getCsrfToken();
         const response = await axios.post<UploadResponse>(
           "http://localhost:8080/upload",
           formData,
-<<<<<<< HEAD
 
-=======
->>>>>>> fa1325591d01322c831701f3f164919d176faa8d
           {
             withCredentials: true,
             headers: {
@@ -296,17 +289,16 @@ const Chat: React.FC = () => {
   return (
     <div
       className="
-<<<<<<< HEAD
 
-=======
->>>>>>> fa1325591d01322c831701f3f164919d176faa8d
+
+
         flex flex-col 
         h-screen 
         bg-gradient-to-b 
         from-green-100 
         via-blue-100 
         to-blue-200
-<<<<<<< HEAD
+
 
       "
     >
@@ -317,14 +309,6 @@ const Chat: React.FC = () => {
           style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
         >
           <span className="inline-block animate-pulse delay-1000 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
-=======
-      "
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between bg-neutral-800 py-2 px-4 shadow">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          <span className="inline-block animate-pulse delay-1000 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
->>>>>>> fa1325591d01322c831701f3f164919d176faa8d
             {roomName}
           </span>
         </h1>
