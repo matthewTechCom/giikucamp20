@@ -1,13 +1,13 @@
 // src/pages/Chat.tsx
 "use client";
 
+import { getCsrfToken } from "@/utils/apiUtils";
 import axios from "axios";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { FaFileImport } from "react-icons/fa";
 import { IoIosSend } from "react-icons/io";
 import { TbLogout2 } from "react-icons/tb";
-import { getCsrfToken } from "@/utils/apiUtils";
 
 // Next.js のルーターと検索パラメータ取得フックを使用
 import { useRouter, useSearchParams } from "next/navigation";
@@ -239,16 +239,20 @@ const Chat: React.FC = () => {
       try {
         const formData = new FormData();
         formData.append("file", selectedFile);
-        console.log(selectedFile)
+
+        console.log(selectedFile);
+
         const csrfToken = await getCsrfToken();
         const response = await axios.post<UploadResponse>(
           "http://localhost:8080/upload",
           formData,
-          { withCredentials: true,
+
+          {
+            withCredentials: true,
             headers: {
               "X-CSRF-Token": csrfToken, // CSRFトークンをヘッダーに追加
             },
-           }
+          }
         );
         const fileUrl = response.data.url;
 
@@ -283,21 +287,27 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="
+    <div
+      className="
+
         flex flex-col 
         h-screen 
         bg-gradient-to-b 
         from-green-100 
         via-blue-100 
         to-blue-200
-      ">
+
+      "
+    >
       {/* Header */}
       <div className="flex items-center justify-between bg-white/80 py-2 px-4 shadow">
         <h1
           className="text-3xl font-extrabold text-white mb-2"
           style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
         >
-        <span className="inline-block animate-pulse delay-1000 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">{roomName}</span>
+          <span className="inline-block animate-pulse delay-1000 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+            {roomName}
+          </span>
         </h1>
         <button
           onClick={handleLeave}
