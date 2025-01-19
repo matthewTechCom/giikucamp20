@@ -2,111 +2,79 @@ package controller
 
 import (
 	"chat_upgrade/usecase"
+	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
-// 部屋登録のエンドポイントを管理するためのインターフェース
 type IRoomController interface {
 	RegisterRoom(c echo.Context) error
-	// GetRoomByName(c echo.Context) error
 	GetAllRooms(c echo.Context) error
-	UpdateRoomImage(c echo.Context) error
+	DeleteOldRooms(c echo.Context) error
 }
 
 type roomController struct {
 	ru usecase.IRoomUsecase
 }
 
-// 新しい roomController のインスタンスを生成
+// 新しい roomController を生成
 func NewRoomController(ru usecase.IRoomUsecase) IRoomController {
-	return &roomController{
-		ru: ru,
-	}
+	return &roomController{ru: ru}
 }
 
-// 部屋画像をアップロードして更新するエンドポイント
-func (rc *roomController) UpdateRoomImage(c echo.Context) error {
-	roomID := c.Param("roomID")
-	file, err := c.FormFile("file")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ファイルが見つかりません"})
-	}
-
-	// roomIDを数値に変換
-	id, err := strconv.Atoi(roomID)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "無効なroomIDです"})
-	}
-
-	// 画像をアップロードして更新
-	if err := rc.ru.UpdateRoomImage(uint(id), file); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	}
-
-	return c.JSON(http.StatusOK, map[string]string{"message": "画像を更新しました"})
-}
-
-// すべての部屋データを取得するハンドラ
-func (rc *roomController) GetAllRooms(c echo.Context) error {
-	rooms, err := rc.ru.GetAllRooms()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": err.Error(),
-		})
-	}
-	return c.JSON(http.StatusOK, rooms)
-}
-
-// フォームから送信された部屋登録情報を元に部屋を登録するエンドポイント
+// 部屋登録エンドポイント
 func (rc *roomController) RegisterRoom(c echo.Context) error {
-	// フォーム値の取得
+	// フォームデータを取得
 	roomName := c.FormValue("roomName")
 	password := c.FormValue("password")
 	description := c.FormValue("description")
 	latitudeStr := c.FormValue("latitude")
 	longitudeStr := c.FormValue("longitude")
+	file, err := c.FormFile("file")
 
-	// 必須項目チェック
+	// 必須項目の確認
 	if roomName == "" || password == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "roomName と password は必須です"})
 	}
 
-	room, err := rc.ru.RegisterRoom(roomName, password, description, latitudeStr, longitudeStr)
+	// ファイルが存在しない場合の処理
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "ルーム登録エラー: " + err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ファイルが提供されていません"})
 	}
 
+	// S3にファイルをアップロード
+	roomIconURL, err := rc.ru.UploadRoomIcon(file)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": fmt.Sprintf("写真のアップロードに失敗しました: %v", err)})
+	}
+
+	// 部屋情報を登録
+	room, err := rc.ru.RegisterRoom(roomName, roomIconURL, password, description, latitudeStr, longitudeStr)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": fmt.Sprintf("ルーム登録エラー: %v", err)})
+	}
+
+	// 登録成功レスポンス
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "ルーム登録成功",
 		"room":    room,
 	})
 }
 
-// 部屋名で部屋情報を取得するエンドポイント
-// func (rc *roomController) GetRoomByName(c echo.Context) error {
-// 	roomName := c.Param("roomName")
-
-// 	if roomName == "" {
-// 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "roomName は必須です"})
-// 	}
-
-// 	room, err := rc.ru.GetRoomByName(roomName)
-// 	if err != nil {
-// 		return c.JSON(http.StatusNotFound, map[string]string{"error": "ルームが見つかりません: " + err.Error()})
-// 	}
-
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
-// 		"room": room,
-// 	})
-// }
+// すべての部屋を取得するエンドポイント
+func (rc *roomController) GetAllRooms(c echo.Context) error {
+	rooms, err := rc.ru.GetAllRooms()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, rooms)
+}
 
 // 古い部屋を削除するエンドポイント
 func (rc *roomController) DeleteOldRooms(c echo.Context) error {
 	if err := rc.ru.DeleteOldRooms(); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "古い部屋の削除に失敗しました: " + err.Error()})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": fmt.Sprintf("古い部屋の削除に失敗しました: %v", err)})
 	}
 	return c.JSON(http.StatusOK, map[string]string{"message": "古い部屋を削除しました"})
 }
