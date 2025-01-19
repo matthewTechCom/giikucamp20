@@ -21,14 +21,34 @@ export default function CreateRoomPage() {
   const [roomPass, setRoomPass] = useState("");
   const [roomIcon, setRoomIcon] = useState<File | null>(null);
 
-  const [clickLocation, setClickLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
+  const [clickLocation, setClickLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [center, setCenter] = useState<{ lat: number; lng: number }>({
+    lat: 35.69575,
+    lng: 139.77521,
+  });
 
   const { isLoaded, loadError } = useLoadScript({ googleMapsApiKey });
-  const center = { lat: 35.69575, lng: 139.77521 };
 
+  // ユーザーの現在位置を取得
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("位置情報の取得に失敗しました:", error);
+        }
+      );
+    } else {
+      console.error("このブラウザはGeolocationに対応していません。");
+    }
+  }, []);
+
+  // ユーザー情報がない場合はダミーのユーザーをセット
   useEffect(() => {
     if (!user) {
       setUser({
@@ -80,7 +100,7 @@ export default function CreateRoomPage() {
       formData.append("longitude", clickLocation.lng.toString());
 
       if (roomIcon) {
-        formData.append("file", roomIcon); // 必要に応じてキーを変更
+        formData.append("file", roomIcon);
       } else {
         console.error("Room icon is missing!");
       }
@@ -104,9 +124,7 @@ export default function CreateRoomPage() {
       const result = await response.json();
       alert("部屋が登録されました！");
       router.push(
-        `/chat?room=${encodeURIComponent(
-          roomName.trim()
-        )}&password=${encodeURIComponent(roomPass.trim())}`
+        `/chat?room=${encodeURIComponent(roomName.trim())}&password=${encodeURIComponent(roomPass.trim())}`
       );
     } catch (error) {
       console.error("リクエストエラー:", error);
@@ -152,9 +170,7 @@ export default function CreateRoomPage() {
             type="file"
             className="border-2 border-dashed border-gray-300 rounded p-4 bg-gray-100 w-full"
             accept="image/*"
-            onChange={(e) =>
-              setRoomIcon(e.target.files ? e.target.files[0] : null)
-            }
+            onChange={(e) => setRoomIcon(e.target.files ? e.target.files[0] : null)}
           />
         </div>
         <div className="mb-4">
@@ -198,7 +214,13 @@ export default function CreateRoomPage() {
           zoom={17}
           onClick={handleMapClick}
         >
-          {clickLocation && <Marker position={clickLocation} />}
+          {/* ユーザーがクリックして選択した座標があればその位置にマーカーを表示。
+              なければ現在位置にもマーカーを表示する例 */}
+          {clickLocation ? (
+            <Marker position={clickLocation} />
+          ) : (
+            <Marker position={center} />
+          )}
         </GoogleMap>
       </div>
       <header className="relative z-10 bg-black bg-opacity-80 p-4 text-white flex justify-between items-center">
