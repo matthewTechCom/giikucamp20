@@ -239,14 +239,21 @@ const Chat: React.FC = () => {
       try {
         const formData = new FormData();
         formData.append("file", selectedFile);
+<<<<<<< HEAD
 
         console.log(selectedFile);
 
+=======
+        console.log(selectedFile);
+>>>>>>> fa1325591d01322c831701f3f164919d176faa8d
         const csrfToken = await getCsrfToken();
         const response = await axios.post<UploadResponse>(
           "http://localhost:8080/upload",
           formData,
+<<<<<<< HEAD
 
+=======
+>>>>>>> fa1325591d01322c831701f3f164919d176faa8d
           {
             withCredentials: true,
             headers: {
@@ -289,13 +296,17 @@ const Chat: React.FC = () => {
   return (
     <div
       className="
+<<<<<<< HEAD
 
+=======
+>>>>>>> fa1325591d01322c831701f3f164919d176faa8d
         flex flex-col 
         h-screen 
         bg-gradient-to-b 
         from-green-100 
         via-blue-100 
         to-blue-200
+<<<<<<< HEAD
 
       "
     >
@@ -306,14 +317,22 @@ const Chat: React.FC = () => {
           style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
         >
           <span className="inline-block animate-pulse delay-1000 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+=======
+      "
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between bg-neutral-800 py-2 px-4 shadow">
+        <h1 className="text-3xl font-bold text-white mb-2">
+          <span className="inline-block animate-pulse delay-1000 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+>>>>>>> fa1325591d01322c831701f3f164919d176faa8d
             {roomName}
           </span>
         </h1>
         <button
           onClick={handleLeave}
-          className="ml-auto hover:bg-red-600 px-3 py-1 rounded"
+          className="ml-auto hover:bg-red-600 px-4 py-2 rounded-lg bg-yellow-300"
         >
-          <TbLogout2 size={25} className="text-blue-400" />
+          <TbLogout2 size={25} className="text-black" />
         </button>
       </div>
 
@@ -326,7 +345,7 @@ const Chat: React.FC = () => {
               alt={`${u.username} icon`}
               width={40}
               height={40}
-              className="object-cover rounded-full border border-gray-300"
+              className="object-cover rounded-full border border-gray-300 aspect-square"
             />
           </div>
         ))}
@@ -341,10 +360,10 @@ const Chat: React.FC = () => {
       </div>
 
       {/* Input */}
-      <div className="bg-white border-t border-gray-300 p-3">
+      <div className="bg-black border-t border-gray-300 p-3 py-4 bg-opacity-80">
         <div className="flex items-center">
           <label htmlFor="file-input" className="mr-2 cursor-pointer">
-            <FaFileImport className="text-2xl text-blue-500 hover:text-gray-800" />
+            <FaFileImport className="text-2xl text-yellow-300 hover:text-yellow-400 mx-2" />
           </label>
           <input
             id="file-input"
@@ -357,7 +376,7 @@ const Chat: React.FC = () => {
 
           <div className="flex-1 flex">
             <input
-              className="flex-1 border border-gray-300 rounded-l px-3 py-2 focus:outline-none"
+              className="flex-1 border-gray-300 rounded-l px-3 py-2 focus:outline-none"
               placeholder="メッセージを入力..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -370,7 +389,7 @@ const Chat: React.FC = () => {
             />
             <button
               onClick={handleSend}
-              className="bg-blue-400 text-white px-4 py-2 rounded-r hover:bg-blue-600"
+              className="bg-yellow-300 text-black px-4 py-2 rounded-r hover:bg-yellow-400"
             >
               <IoIosSend size={25} />
             </button>
