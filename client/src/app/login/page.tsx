@@ -53,7 +53,11 @@ const LoginPage = () => {
       <div className="text-center mb-12">
         <h1
           className="text-6xl font-extrabold mb-6 text-white drop-shadow-lg"
-          style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
+          style={{
+            fontFamily: '"Comic Sans MS", "Comic Sans", cursive',
+            cursor: "pointer",
+          }}
+          onClick={() => router.push("/")}
         >
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
             MapChat
