@@ -9,9 +9,22 @@ import {
   useLoadScript,
   OverlayView,
 } from "@react-google-maps/api";
+import Image from "next/image";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
+// サーバーからのレスポンス型定義
+interface RoomApiResponse {
+  id: number;
+  roomName: string;
+  roomImage: string;
+  password: string;
+  description: string;
+  latitude: string;  // サーバーからは文字列で返されると仮定
+  longitude: string;
+}
+
+// コンポーネント内で使用するルーム情報型定義
 interface RoomInfoState {
   id: number;
   roomName: string;
@@ -31,7 +44,32 @@ export default function SearchRoomPage() {
 
   const { isLoaded, loadError } = useLoadScript({ googleMapsApiKey });
 
-  // 部屋リストを取得
+  // 地図の中心位置をユーザーの現在位置に設定
+  const [center, setCenter] = useState<{ lat: number; lng: number }>({
+    lat: 35.69575, // 初期値として秋葉原付近
+    lng: 139.77521,
+  });
+
+  // ユーザーの現在位置を取得して中心を更新
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCenter({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("位置情報の取得に失敗しました:", error);
+        }
+      );
+    } else {
+      console.error("このブラウザはGeolocationに対応していません。");
+    }
+  }, []);
+
+  // 部屋リストをサーバーから取得
   useEffect(() => {
     async function loadRooms() {
       try {
@@ -45,8 +83,11 @@ export default function SearchRoomPage() {
         const data = await res.json();
         console.log("Raw data from server:", data);
 
-        // APIからのlatitude/longitude文字列を数値型へ変換
-        const numericData = data.map((room: any) => {
+        // 型アサーションを利用して、dataをRoomApiResponseの配列とみなす
+        const roomsData = data as RoomApiResponse[];
+
+        // サーバーからの latitude / longitude を数値に変換して roomLatitude / roomLongitude にする
+        const numericData: RoomInfoState[] = roomsData.map((room) => {
           const lat = parseFloat(room.latitude);
           const lng = parseFloat(room.longitude);
 
@@ -59,7 +100,11 @@ export default function SearchRoomPage() {
           }
 
           return {
-            ...room,
+            id: room.id,
+            roomName: room.roomName,
+            roomImage: room.roomImage,
+            password: room.password,
+            description: room.description,
             roomLatitude: lat,
             roomLongitude: lng,
           };
@@ -80,14 +125,12 @@ export default function SearchRoomPage() {
     loadRooms();
   }, []);
 
-  // rooms 更新時にログを出す
+  // rooms 更新時にログを出力
   useEffect(() => {
     console.log("rooms state updated:", rooms);
   }, [rooms]);
 
-  // 地図の中心座標（例：秋葉原付近）
-  const center = { lat: 35.69575, lng: 139.77521 };
-
+  // ユーザーがログインしていなければメッセージを表示
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -96,14 +139,17 @@ export default function SearchRoomPage() {
     );
   }
 
+  // 地図の読み込みエラー
   if (loadError) {
     return <div>地図を読み込めませんでした。</div>;
   }
 
+  // 地図がロード中
   if (!isLoaded) {
     return <div>地図を読み込んでいます...</div>;
   }
 
+  // データの読み込み中またはエラー表示
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -134,6 +180,7 @@ export default function SearchRoomPage() {
                     )}&password=${encodeURIComponent(roomInfo.password.trim())}`
                   )
                 }
+                options={{ cursor: "default" }} // カーソルをデフォルトに設定
               />
 
               {/* ピンの上部に丸い画像を重ねる OverlayView */}
@@ -142,13 +189,10 @@ export default function SearchRoomPage() {
                   lat: roomInfo.roomLatitude,
                   lng: roomInfo.roomLongitude,
                 }}
-                // Markerと同じ座標に配置しつつ、上にずらす
                 mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
                 getPixelPositionOffset={() => ({
-                  // xは円の中心をピンの中心に合わせる
-                  x: -(circleSize / 2),
-                  // yは丸いアイコンの高さ分 + 余裕(20px)で上へ
-                  y: -(circleSize + 10),
+                  x: -(circleSize / 2), // 円の中心をピンの中心に合わせる
+                  y: -(circleSize + 10), // 円の高さ分上にずらす
                 })}
               >
                 <div
@@ -167,14 +211,14 @@ export default function SearchRoomPage() {
                     borderRadius: "50%",
                     overflow: "hidden",
                     cursor: "pointer",
-                    // 枠線が必要な場合:
-                    // border: "2px solid white",
                     zIndex: 9999,
                   }}
                 >
-                  <img
+                  <Image
                     src={roomInfo.roomImage}
-                    alt="room icon"
+                    alt={`${roomInfo.roomName} icon`}
+                    width={circleSize}
+                    height={circleSize}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -199,7 +243,7 @@ export default function SearchRoomPage() {
         </button>
       </header>
 
-      {/* メイン（クリック操作を地図に通したい場合はpointer-events-none） */}
+      {/* メインコンテンツ */}
       <main className="relative z-10 flex-1 pointer-events-none" />
 
       {/* フッター */}
