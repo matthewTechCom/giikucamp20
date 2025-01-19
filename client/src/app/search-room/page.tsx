@@ -4,6 +4,8 @@ import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserContext } from "@/context/UserContext";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { useMapTransactionContext } from "@/context/MapContext";
+import { RoomDetail } from "@/components/map/RoomDetail";
 
 const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
@@ -17,12 +19,24 @@ interface RoomInfoState {
   roomLongitude: number;
 }
 
+let defaulData = {
+  id: 0,
+  roomName: "",
+  roomImage: "",
+  password: "",
+  description: "",
+  roomLatitude: 0,
+  roomLongitude: 0,
+}
+
 export default function SearchRoomPage() {
   const [rooms, setRooms] = useState<RoomInfoState[]>([]);
+  const [nowRoom, setNowRoom] = useState<RoomInfoState>(defaulData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { user } = useContext(UserContext);
+  const { isRoomDetailModal ,setIsRoomDetailModal, pushToRoomTriger, setPushToRoomTriger } = useMapTransactionContext();
 
   const { isLoaded, loadError } = useLoadScript({ googleMapsApiKey });
 
@@ -106,6 +120,7 @@ export default function SearchRoomPage() {
   return (
     <div className="relative w-screen h-screen">
       {/* 地図（最背面） */}
+      {isRoomDetailModal && <RoomDetail nowRoom={nowRoom}/>}
       <div className="absolute inset-0 z-0 min-h-screen">
         <GoogleMap
           mapContainerStyle={{ width: "100%", height: "100%" }}
@@ -124,13 +139,11 @@ export default function SearchRoomPage() {
                 url: roomInfo.roomImage,
                 scaledSize: new google.maps.Size(35, 35),
               }}
-              onClick={() =>
-                router.push(
-                  `/chat?room=${encodeURIComponent(
-                    roomInfo.roomName.trim()
-                  )}&password=${encodeURIComponent(roomInfo.password.trim())}`
-                )
+              onClick={() => {
+               setIsRoomDetailModal(true)
+               setNowRoom(roomInfo);
               }
+            }
             />
           ))}
         </GoogleMap>
@@ -154,7 +167,7 @@ export default function SearchRoomPage() {
             className="pointer-events-auto bg-yellow-300 text-black px-4 py-2 rounded-lg font-semibold"
             onClick={() => router.push("/chat")}
           >
-            このルームに参加する →
+            参加したいピンをクリックしてください
           </button>
         </div>
       </footer>
