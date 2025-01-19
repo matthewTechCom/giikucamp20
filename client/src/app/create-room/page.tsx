@@ -1,6 +1,6 @@
 "use client";
 
-import { useMapTransactionContext } from "@/context/MapContext";
+// import { useMapTransactionContext } from "@/context/MapContext";
 import { UserContext } from "@/context/UserContext";
 import { getCsrfToken } from "@/utils/apiUtils";
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
@@ -12,8 +12,9 @@ const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLEMAP_API_KEY as string;
 
 export default function CreateRoomPage() {
   const router = useRouter();
+  
+  // const { roomInfo, setRoomInfo } = useMapTransactionContext();
   const { user, setUser } = useContext(UserContext);
-  const { roomInfo, setRoomInfo } = useMapTransactionContext();
 
   const [currentStep, setCurrentStep] = useState<number>(2);
   const [roomName, setRoomName] = useState("");
@@ -21,7 +22,9 @@ export default function CreateRoomPage() {
   const [roomPass, setRoomPass] = useState("");
   const [roomIcon, setRoomIcon] = useState<File | null>(null);
 
+  // クリック位置（マップ上でルーム作成位置を指定）
   const [clickLocation, setClickLocation] = useState<{ lat: number; lng: number } | null>(null);
+  // 現在位置（マップの初期表示位置として利用）
   const [center, setCenter] = useState<{ lat: number; lng: number }>({
     lat: 35.69575,
     lng: 139.77521,
@@ -29,7 +32,7 @@ export default function CreateRoomPage() {
 
   const { isLoaded, loadError } = useLoadScript({ googleMapsApiKey });
 
-  // ユーザーの現在位置を取得
+  // ユーザーの現在位置を取得して center を更新する
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -75,6 +78,7 @@ export default function CreateRoomPage() {
     return <div>地図を読み込んでいます...</div>;
   }
 
+  // マップをクリックしたとき、クリック位置（緯度・経度）を更新
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
     if (event.latLng) {
       const lat = event.latLng.lat();
@@ -84,6 +88,7 @@ export default function CreateRoomPage() {
   };
 
   const handleSubmit = async () => {
+    // クリック位置（もしくはルーム位置）が設定されていなければ警告
     if (!clickLocation) {
       alert("マップ上でルームの場所を選択してください");
       return;
@@ -121,7 +126,7 @@ export default function CreateRoomPage() {
         return;
       }
 
-      const result = await response.json();
+      await response.json();
       alert("部屋が登録されました！");
       router.push(
         `/chat?room=${encodeURIComponent(roomName.trim())}&password=${encodeURIComponent(roomPass.trim())}`
@@ -133,6 +138,7 @@ export default function CreateRoomPage() {
   };
 
   return currentStep === 2 ? (
+    // ルーム情報を入力する画面
     <div className="flex flex-col justify-center min-h-screen bg-black text-slate-100 bg-opacity-80">
       <div className="fixed inset-0 h-screen -z-10">
         <Image
@@ -152,7 +158,7 @@ export default function CreateRoomPage() {
           戻る
         </button>
       </div>
-      <div className="mx-4 bg-white bg-opacity-20 rounded-2xl p-10 backdrop-blur-sm shadow-lg border-white border-opacity-20 border">
+      <div className="mx-4 bg-white bg-opacity-20 rounded-2xl p-10 backdrop-blur-sm shadow-lg border border-white border-opacity-20">
         <div className="mb-4">
           <label className="block mb-1 font-bold">ルーム名</label>
           <input
@@ -206,6 +212,7 @@ export default function CreateRoomPage() {
       </div>
     </div>
   ) : (
+    // マップ上でルームの位置を指定する画面
     <div className="relative w-screen h-screen">
       <div className="absolute inset-0 z-0 min-h-screen">
         <GoogleMap
@@ -214,13 +221,12 @@ export default function CreateRoomPage() {
           zoom={17}
           onClick={handleMapClick}
         >
-          {/* ユーザーがクリックして選択した座標があればその位置にマーカーを表示。
-              なければ現在位置にもマーカーを表示する例 */}
-          {clickLocation ? (
-            <Marker position={clickLocation} />
-          ) : (
-            <Marker position={center} />
-          )}
+          {/* もしユーザーがマップ上をクリックして位置指定していればその位置、
+              そうでなければ自動で取得した現在位置(center)にマーカーを表示 */}
+          <Marker
+            position={clickLocation ? clickLocation : center}
+            options={{ cursor: "default", clickable: false }}
+          />
         </GoogleMap>
       </div>
       <header className="relative z-10 bg-black bg-opacity-80 p-4 text-white flex justify-between items-center">
