@@ -34,18 +34,18 @@ export const RoomDetail = ({nowRoom}: any) => {
   }
   return (
     <>
-      <div className="absolute top-1/2 transform -translate-x-48 -translate-y-1/2 z-50 w-40 m-48">
+      <div className="absolute top-1/2 transform md:translate-x-96 -translate-y-1/2 md:px-48 -translate-x-48 z-50 w-40 m-48">
         <div className="rounded shadow-md w-96 ">
           <div className="flex justify-center min-h-screen ">
         <div className="rounded shadow-md w-96 ">
 
             <div className="">
               <div className="bg-gray-500 rounded-lg bg-opacity-90 m-10 p-10">
-                <p className="text-center text-2xl font-bold mb-5">
+                <p className="text-center text-white text-2xl font-bold mb-5">
                   ルームの詳細
                 </p>
                 <div className="flex flex-col gap-3">
-                  <h2 className="font-bold">集会所名 : {nowRoom.roomName}</h2>
+                  <h2 className="font-bold text-xl">集会所名 :　<span className="text-white">{nowRoom.roomName}</span></h2>
                   <h2 className="font-bold">ルームの説明</h2>
                   <p className="border-2 p-1 rounded-md bg-slate-100">
                     {nowRoom.description}

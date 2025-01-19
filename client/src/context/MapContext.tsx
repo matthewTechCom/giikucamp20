@@ -47,7 +47,7 @@ const MapContext = createContext<AppContextType>(defaultContextData);
 
 export function MapProvider({ children }: AppProviderProps) {
   const [isFirstViewModal, setIsFirstViewModal] = useState(true);
-  const [isRoomDetailModal, setIsRoomDetailModal] = useState(true);
+  const [isRoomDetailModal, setIsRoomDetailModal] = useState(false);
   const [pushToRoomTriger, setPushToRoomTriger] = useState(false);
   const [roomInfo, setRoomInfo] = useState<RoomState>({
     roomName: "",
